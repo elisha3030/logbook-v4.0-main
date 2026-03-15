@@ -199,6 +199,19 @@
                 <!-- Activity Buttons will be injected via JS -->
             </div>
 
+            <!-- Other Activity Input (Hidden initially) -->
+            <div id="otherActivitySection" class="hidden w-full max-w-xl space-y-4 p-8 bg-white dark:bg-slate-800 rounded-[2.5rem] border border-blue-100 dark:border-blue-900/30 shadow-xl">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Please specify your activity</label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" id="customActivityInput" placeholder="Enter your activity..."
+                        class="flex-grow px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all font-bold">
+                    <button id="submitCustomActivityBtn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-black px-8 py-4 sm:py-0 rounded-2xl shadow-lg transition-all active:scale-95">
+                        Continue
+                    </button>
+                </div>
+            </div>
+
             <button id="cancelActivityBtn"
                 class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
                 Cancel & Go Back
@@ -252,7 +265,7 @@
         <div id="facultySelection"
             class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div class="text-center space-y-4">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Step 3 of 3</p>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Step 4 of 4</p>
                 <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Visit In-Charge</h2>
                 <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Who are you visiting for this
                     <span id="selectedActivityName" class="text-emerald-600 font-black">activity</span>?

@@ -100,6 +100,21 @@ class StudentKioskManager {
         document.getElementById('switchStudentBtn')?.addEventListener('click', () => this.resetUI());
         document.getElementById('proceedToTransactionBtn')?.addEventListener('click', () => this.showActivitySelection());
 
+        document.getElementById('submitCustomActivityBtn')?.addEventListener('click', () => {
+            const input = document.getElementById('customActivityInput');
+            const customVal = input?.value.trim();
+            if (!customVal) {
+                this.showToast('Please specify your activity.', 'warning');
+                return;
+            }
+            this.selectedActivity = customVal;
+            this.showDetailsPrompt();
+        });
+
+        document.getElementById('customActivityInput')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('submitCustomActivityBtn')?.click();
+        });
+
         // Navigation: Details Step
         document.getElementById('backToActivityFromDetailsBtn')?.addEventListener('click', () => this.showActivitySelection());
         document.getElementById('skipDetailsBtn')?.addEventListener('click', () => this.submitDetails(''));
@@ -363,14 +378,14 @@ class StudentKioskManager {
                     const statusText = log.timeOut ? 'Completed' : 'Active';
 
                     row.innerHTML = `
-                        <td class="px-8 py-5 font-bold text-slate-600 text-xs">${date}</td>
+                        <td class="px-8 py-5 font-bold text-slate-500 dark:text-slate-400 text-xs">${date}</td>
                         <td class="px-6 py-5">
-                            <span class="block font-black text-slate-800 text-sm leading-tight">${log.activity}</span>
+                            <span class="block font-black text-slate-800 dark:text-white text-sm leading-tight">${log.activity || '<span class="text-slate-400 font-normal italic">—</span>'}</span>
                         </td>
                         <td class="px-6 py-5 text-center">
                             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${statusClass}">${statusText}</span>
                         </td>
-                        <td class="px-8 py-5 text-right font-bold text-slate-500 text-xs">${log.staff || '---'}</td>
+                        <td class="px-8 py-5 text-right font-bold text-slate-500 dark:text-slate-300 text-xs">${log.staff || '---'}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -389,6 +404,9 @@ class StudentKioskManager {
         if (!activitySection) return;
 
         activitySection.classList.remove('hidden');
+        document.getElementById('otherActivitySection')?.classList.add('hidden');
+        document.getElementById('activityGrid')?.classList.remove('hidden');
+
         const nameEl = document.getElementById('scannedStudentFirstName');
         if (nameEl) nameEl.textContent = this.currentStudent.name.split(' ')[0];
 
@@ -419,7 +437,13 @@ class StudentKioskManager {
 
     selectActivity(activity) {
         if (activity === 'Others') {
-            document.getElementById('otherActivitySection')?.classList.remove('hidden');
+            document.getElementById('activityGrid')?.classList.add('hidden');
+            const otherSection = document.getElementById('otherActivitySection');
+            if (otherSection) {
+                otherSection.classList.remove('hidden');
+                otherSection.scrollIntoView({ behavior: 'smooth' });
+                document.getElementById('customActivityInput')?.focus();
+            }
             return;
         }
         this.selectedActivity = activity;
@@ -555,7 +579,7 @@ class StudentKioskManager {
 
         try {
             // Combine activity and details if provided
-            let finalActivity = this.selectedActivity;
+            let finalActivity = this.selectedActivity || 'General Visit';
             if (this.selectedDetails) {
                 finalActivity += ` - ${this.selectedDetails}`;
             }
