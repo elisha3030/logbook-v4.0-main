@@ -34,7 +34,11 @@ async function loadFacultySidebar() {
     if (faculty.length === 0) {
         html += `<p class="text-[11px] italic text-slate-600 px-4 mb-2">No faculty added</p>`;
     } else {
-        faculty.forEach(name => {
+        faculty.forEach(item => {
+            // Handle both array of strings and array of objects
+            const name = typeof item === 'string' ? item : item.name;
+            if (!name) return;
+
             const encoded = encodeURIComponent(name);
             const isActive = currentPage === 'faculty.html' &&
                 new URLSearchParams(window.location.search).get('staff') === name;

@@ -770,19 +770,39 @@ app.get('/api/settings/staff', async (req, res) => {
 // GET combined faculty list for student portal
 app.get('/api/faculty', async (req, res) => {
     try {
-        // Try to get explicit faculty list from settings
-        const row = await localDb.get("SELECT value FROM settings WHERE key = 'facultyList'");
-        let faculty = [];
+        // Fetch ALL settings just like /api/settings does (this is known to work for the sidebar)
+        const rows = await localDb.all('SELECT key, value FROM settings');
+        const settings = {};
+        for (const row of rows) {
+            settings[row.key] = row.value;
+        }
 
-        if (row && row.value) {
+        let faculty = [];
+        // Support both 'faculty' and 'facultyList'
+        const rawFaculty = settings.faculty || settings.facultyList;
+
+        if (rawFaculty) {
             try {
-                faculty = JSON.parse(row.value);
+                const parsed = JSON.parse(rawFaculty);
+                if (Array.isArray(parsed)) {
+                    faculty = parsed.map(f => {
+                        if (typeof f === 'string') {
+                            return { name: f, position: 'Faculty', photoURL: null };
+                        }
+                        return f;
+                    });
+                } else if (typeof parsed === 'object' && parsed !== null) {
+                    faculty = [parsed];
+                }
             } catch (e) {
-                console.error("Error parsing facultyList setting:", e);
+                // Not JSON - handle as plain string if possible
+                if (typeof rawFaculty === 'string' && rawFaculty.trim()) {
+                    faculty = [{ name: rawFaculty.trim(), position: 'Faculty', photoURL: null }];
+                }
             }
         }
 
-        // If no explicit list exists, fallback to admins
+        // Only fall back to admins if we still have nothing
         if (faculty.length === 0) {
             const admins = await localDb.all('SELECT displayName as name, "Administrator" as position FROM admin_users');
             faculty = admins.map(a => ({

@@ -189,15 +189,17 @@
         <div class="p-8 space-y-6">
 
             <!-- Faculty name not provided state -->
-            <div id="noFacultyState" class="hidden">
-                <div
-                    class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm p-16 text-center">
-                    <div
-                        class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="user-x" class="w-8 h-8 text-slate-400"></i>
+            <div id="noFacultyState" class="hidden flex-grow flex flex-col items-center justify-center py-20">
+                <div class="text-center mb-12">
+                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="users" class="w-10 h-10 text-blue-600 dark:text-blue-400"></i>
                     </div>
-                    <h3 class="text-xl font-black text-slate-700 dark:text-white mb-2">No Faculty Selected</h3>
-                    <p class="text-slate-400 text-sm">Please select a faculty member from the sidebar.</p>
+                    <h2 class="text-4xl font-black text-slate-800 dark:text-white tracking-tight">Faculty Hub</h2>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-lg mt-2">Please select your name to manage your student queue.</p>
+                </div>
+
+                <div id="facultySelectionGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                    <!-- Populated via JS -->
                 </div>
             </div>
 

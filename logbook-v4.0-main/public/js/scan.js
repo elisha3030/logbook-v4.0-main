@@ -55,6 +55,21 @@ class ScannerManager {
                 }
             }
 
+            // 2b. Populate staff dropdown from /api/faculty
+            const staffSelect = document.getElementById('logStaff');
+            if (staffSelect) {
+                try {
+                    const res = await fetch('/api/faculty');
+                    const faculties = await res.json();
+                    if (faculties.length > 0) {
+                        staffSelect.innerHTML = '<option value="">Select Staff</option>' +
+                            faculties.map(f => `<option value="${f.name}">${f.name}</option>`).join('');
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Could not load faculty list:', e.message);
+                }
+            }
+
             // 3. Toggle year level field in registration form
             const yearLevelWrapper = document.getElementById('regYearLevel')?.closest('.space-y-2');
             if (yearLevelWrapper) {
