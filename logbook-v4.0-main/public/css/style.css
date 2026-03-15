@@ -1,0 +1,701 @@
+/*
+  Logbook System — Global Stylesheet
+  Dark mode: toggled via `dark` class on <html> by settings.js/localStorage.
+  All dark overrides are outside @layer so they win over Tailwind utility classes.
+*/
+
+/* ============================================================ */
+/* Color-scheme hint (tells browser scrollbars / inputs)        */
+/* ============================================================ */
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+}
+
+/* ============================================================ */
+/* LIGHT MODE — Form controls always have a visible border      */
+/* Without this, border-slate-50 inputs are invisible on white  */
+/* ============================================================ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]):not(.no-border),
+select:not(.no-border),
+textarea:not(.no-border) {
+    border-color: #e2e8f0;
+    /* slate-200 — always visible in light mode */
+}
+
+/* ============================================================ */
+/* Smooth theme transition — applied globally                   */
+/* ============================================================ */
+html,
+html *:not(svg):not(svg *) {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* SVG / icon elements — no transition (avoids icon repaint jank) */
+html svg,
+html svg * {
+    transition: none !important;
+}
+
+/* But NOT for transforms / animations — keep those snappy */
+html .transition-all,
+html .transition-transform,
+html [class*="hover:scale"],
+html [class*="active:scale"],
+html [class*="animate-"] {
+    transition-property: all;
+}
+
+/* ============================================================ */
+/* DARK MODE — Base                                             */
+/* ============================================================ */
+.dark,
+.dark body {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+/* ============================================================ */
+/* DARK MODE — Backgrounds                                      */
+/* ============================================================ */
+.dark .bg-white {
+    background-color: #1e293b !important;
+}
+
+.dark .bg-slate-50 {
+    background-color: #0f172a !important;
+}
+
+.dark .bg-slate-100 {
+    background-color: #1e293b !important;
+}
+
+.dark .bg-slate-200 {
+    background-color: #334155 !important;
+}
+
+.dark .bg-slate-700 {
+    background-color: #334155 !important;
+}
+
+.dark .bg-slate-800 {
+    background-color: #1e293b !important;
+}
+
+.dark .bg-slate-800\/50 {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+.dark .bg-slate-900 {
+    background-color: #020617 !important;
+}
+
+/* Semi-transparent variants */
+.dark .bg-slate-50\/50 {
+    background-color: rgba(15, 23, 42, 0.6) !important;
+}
+
+.dark .bg-slate-50\/80 {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+.dark .bg-slate-900\/60 {
+    background-color: rgba(2, 6, 23, 0.75) !important;
+}
+
+/* Coloured tint backgrounds (stat cards, badges, icons) - lowered opacity for dark mode to prevent glow */
+.dark .bg-blue-50 {
+    background-color: rgba(30, 58, 138, 0.2) !important;
+}
+
+.dark .bg-blue-100 {
+    background-color: rgba(30, 58, 138, 0.3) !important;
+}
+
+.dark .bg-emerald-50 {
+    background-color: rgba(6, 78, 59, 0.2) !important;
+}
+
+.dark .bg-emerald-100 {
+    background-color: rgba(6, 78, 59, 0.3) !important;
+}
+
+.dark .bg-amber-50 {
+    background-color: rgba(120, 53, 15, 0.2) !important;
+}
+
+.dark .bg-amber-100 {
+    background-color: rgba(120, 53, 15, 0.3) !important;
+}
+
+.dark .bg-indigo-50 {
+    background-color: rgba(49, 46, 129, 0.2) !important;
+}
+
+.dark .bg-indigo-100 {
+    background-color: rgba(49, 46, 129, 0.3) !important;
+}
+
+.dark .bg-violet-50 {
+    background-color: rgba(76, 29, 149, 0.2) !important;
+}
+
+.dark .bg-violet-100 {
+    background-color: rgba(76, 29, 149, 0.3) !important;
+}
+
+.dark .bg-rose-50 {
+    background-color: rgba(159, 18, 57, 0.2) !important;
+}
+
+.dark .bg-rose-100 {
+    background-color: rgba(159, 18, 57, 0.3) !important;
+}
+
+.dark .bg-red-50 {
+    background-color: rgba(127, 29, 29, 0.2) !important;
+}
+
+.dark .bg-red-100 {
+    background-color: rgba(127, 29, 29, 0.3) !important;
+}
+
+.dark .bg-sky-50 {
+    background-color: rgba(12, 74, 110, 0.2) !important;
+}
+
+.dark .bg-sky-100 {
+    background-color: rgba(12, 74, 110, 0.3) !important;
+}
+
+/* Login page mesh gradient blobs */
+.dark .bg-blue-100\/50 {
+    background-color: rgba(37, 99, 235, 0.06) !important;
+}
+
+.dark .bg-emerald-50\/50 {
+    background-color: rgba(5, 150, 105, 0.06) !important;
+}
+
+.dark .bg-slate-100\/50 {
+    background-color: rgba(30, 41, 59, 0.06) !important;
+}
+
+.dark .bg-slate-50\/20 {
+    background-color: transparent !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Text                                             */
+/* ============================================================ */
+.dark .text-slate-900 {
+    color: #f1f5f9 !important;
+}
+
+.dark .text-slate-800 {
+    color: #e2e8f0 !important;
+}
+
+.dark .text-slate-700 {
+    color: #cbd5e1 !important;
+}
+
+.dark .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+.dark .text-slate-500 {
+    color: #94a3b8 !important;
+}
+
+.dark .text-slate-400 {
+    color: #64748b !important;
+}
+
+.dark .text-slate-300 {
+    color: #94a3b8 !important;
+}
+
+/* Vibrant accent text — stay vivid on dark backgrounds */
+.dark .text-blue-600,
+.dark .text-blue-500 {
+    color: #60a5fa !important;
+}
+
+.dark .text-emerald-600,
+.dark .text-emerald-700 {
+    color: #34d399 !important;
+}
+
+.dark .text-rose-600,
+.dark .text-red-600 {
+    color: #fb7185 !important;
+}
+
+.dark .text-red-500 {
+    color: #fb7185 !important;
+}
+
+.dark .text-red-800 {
+    color: #fca5a5 !important;
+}
+
+.dark .text-amber-600 {
+    color: #fbbf24 !important;
+}
+
+.dark .text-violet-600 {
+    color: #a78bfa !important;
+}
+
+.dark .text-sky-600 {
+    color: #38bdf8 !important;
+}
+
+.dark .text-indigo-600 {
+    color: #818cf8 !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Borders                                          */
+/* ============================================================ */
+.dark .border-white {
+    border-color: #334155 !important;
+}
+
+.dark .border-slate-50 {
+    border-color: #1e293b !important;
+}
+
+.dark .border-slate-100 {
+    border-color: #1e293b !important;
+}
+
+.dark .border-slate-200 {
+    border-color: #334155 !important;
+}
+
+.dark .border-slate-300 {
+    border-color: #475569 !important;
+}
+
+.dark .border-emerald-200 {
+    border-color: rgba(52, 211, 153, 0.3) !important;
+}
+
+.dark .border-red-100 {
+    border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.dark .border-blue-100 {
+    border-color: rgba(37, 99, 235, 0.25) !important;
+}
+
+/* Dividers */
+.dark .divide-slate-50>*+* {
+    border-color: #1e293b !important;
+}
+
+.dark .divide-slate-100>*+* {
+    border-color: #334155 !important;
+}
+
+.dark .divide-y>* {
+    border-color: #1e293b !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Shadows (mute light-coloured shadows)           */
+/* ============================================================ */
+.dark .shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-lg {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-xl {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-2xl {
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.60) !important;
+}
+
+.dark .shadow-blue-200,
+.dark .shadow-blue-900\/10 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-blue-100 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-emerald-200 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-amber-200 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-indigo-200 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-red-100,
+.dark .shadow-red-200 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-slate-200,
+.dark .shadow-slate-200\/50 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-violet-200 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+.dark .shadow-blue-900\/20 {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.50) !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Hover states                                     */
+/* ============================================================ */
+.dark .hover\:bg-white:hover {
+    background-color: #334155 !important;
+}
+
+.dark .hover\:bg-slate-50:hover {
+    background-color: #1e293b !important;
+}
+
+.dark .hover\:bg-slate-100:hover {
+    background-color: #334155 !important;
+}
+
+.dark .hover\:bg-slate-200:hover {
+    background-color: #475569 !important;
+}
+
+.dark .hover\:bg-slate-800:hover {
+    background-color: #0f172a !important;
+}
+
+.dark .hover\:shadow-xl:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .hover\:border-blue-100:hover {
+    border-color: rgba(37, 99, 235, 0.3) !important;
+}
+
+.dark .hover\:border-emerald-100:hover {
+    border-color: rgba(5, 150, 105, 0.3) !important;
+}
+
+.dark .hover\:border-amber-100:hover {
+    border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.dark .hover\:border-indigo-100:hover {
+    border-color: rgba(79, 70, 229, 0.3) !important;
+}
+
+/* Table row hover */
+.dark .hover\:bg-slate-50:hover td {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+.dark tbody tr:hover td {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Form Controls                                    */
+/* ============================================================ */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+.dark select,
+.dark textarea {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+.dark input::placeholder {
+    color: #475569 !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+    background-color: #1e293b !important;
+    border-color: #3b82f6 !important;
+}
+
+/* Fix dropdown options getting white background with white text in dark mode */
+.dark select option {
+    background-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Header / Nav bar                                 */
+/* ============================================================ */
+.dark header,
+.dark header.bg-white {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Table                                            */
+/* ============================================================ */
+.dark table {
+    color: #e2e8f0;
+}
+
+.dark thead,
+.dark thead tr,
+.dark .bg-slate-50\/80 {
+    background-color: #0f172a !important;
+}
+
+.dark thead th {
+    color: #64748b !important;
+    border-color: #1e293b !important;
+}
+
+.dark tbody tr {
+    border-color: #1e293b !important;
+}
+
+.dark tr.border-slate-100,
+.dark tr.border-b {
+    border-color: #1e293b !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Modals & Overlays                                */
+/* ============================================================ */
+.dark #entryModal>div,
+.dark #studentModal>div,
+.dark #confirmModal .modal-card {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Login page                                       */
+/* ============================================================ */
+.dark .selection\:bg-blue-100 {
+    --tw-selection-bg: rgba(37, 99, 235, 0.3);
+}
+
+/* Login card border */
+.dark .border-white {
+    border-color: #334155 !important;
+}
+
+/* "Stay signed in" checkbox area */
+.dark .border-slate-200.rounded-lg {
+    border-color: #475569 !important;
+}
+
+/* Divider line at bottom of login card */
+.dark .border-slate-50 {
+    border-color: #1e293b !important;
+}
+
+/* Login error box */
+.dark .bg-red-50.border.border-red-100 {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #fca5a5 !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Settings page specifics                          */
+/* ============================================================ */
+/* Toggle switch track */
+.dark .bg-slate-200.peer-checked\:bg-violet-600 {
+    background-color: #334155;
+}
+
+/* Quick nav pills */
+.dark a.border-slate-200 {
+    border-color: #334155 !important;
+    color: #94a3b8 !important;
+}
+
+.dark a.border-slate-200:hover {
+    border-color: rgba(124, 58, 237, 0.5) !important;
+    color: #a78bfa !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Scan page                                        */
+/* ============================================================ */
+.dark .border-dashed.border-slate-200 {
+    border-color: #334155 !important;
+}
+
+.dark .hover\:border-blue-200:hover {
+    border-color: rgba(37, 99, 235, 0.4) !important;
+}
+
+.dark .hover\:bg-blue-50\/5:hover {
+    background-color: rgba(37, 99, 235, 0.05) !important;
+}
+
+/* ============================================================ */
+/* DARK MODE — Scrollbar                                        */
+/* ============================================================ */
+.dark ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ============================================================ */
+/* LIGHT MODE — Custom Scrollbar                                */
+/* ============================================================ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ============================================================ */
+/* PRINT styles                                                  */
+/* ============================================================ */
+@media print {
+
+    .navbar,
+    button,
+    .no-print {
+        display: none !important;
+    }
+
+    body {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    .bg-white {
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    .table {
+        font-size: 10pt;
+    }
+}
+
+/* ============================================================ */
+/* Micro-animations                                              */
+/* ============================================================ */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-custom {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes pulse-slow {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Toast slide-in */
+.toast-item {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast-item.fade-out {
+    opacity: 0;
+    transform: translateX(1rem) scale(0.9);
+}
+
+/* ============================================================ */
+/* Misc utilities                                                */
+/* ============================================================ */
+.id-badge-bg {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+}
+
+/* Sidebar width + responsive collapse (shared across all pages) */
+.sidebar {
+    width: 280px;
+    transition: transform 0.3s ease, width 0.3s ease;
+}
+
+.main-content {
+    margin-left: 280px;
+    width: calc(100% - 280px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 100;
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+}

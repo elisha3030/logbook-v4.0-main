@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Logbook System - System Settings</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'selector'
+        }
+    </script>
+    <script src="/js/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar {
+            width: 280px;
+            transition: all 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 100;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .toast-item {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-item.fade-out {
+            opacity: 0;
+            transform: translateX(1rem) scale(0.9);
+        }
+
+        .settings-section {
+            scroll-margin-top: 6rem;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white font-sans min-h-screen flex">
+
+    <!-- Sidebar Navigation -->
+    <aside
+        class="sidebar bg-slate-900 h-screen fixed left-0 top-0 text-slate-400 flex flex-col border-r border-slate-800 shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-800 mb-6">
+            <a href="dashboard.html" class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl text-white">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <span id="sidebarOfficeName" class="text-xl font-black text-white tracking-tight">Logbook<span
+                        class="text-blue-500">.</span></span>
+            </a>
+        </div>
+        <nav class="flex-grow px-4 space-y-2">
+            <div class="mb-4">
+                <a href="portal.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest text-emerald-500 bg-emerald-500/5 border border-emerald-500/20 group">
+                    <i data-lucide="layout-grid" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                    Back to Portal
+                </a>
+            </div>
+
+            <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Main Menu</div>
+            <a href="dashboard.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
+                Dashboard
+            </a>
+            <a href="scan.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="scan" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
+                Scan ID
+            </a>
+            <a href="history.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="history" class="w-5 h-5 group-hover:text-emerald-400 transition-colors"></i>
+                    Log History
+                </div>
+            </a>
+            <div class="pt-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Management
+            </div>
+            <a href="students.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="users" class="w-5 h-5 group-hover:text-amber-400 transition-colors"></i>
+                    Student Records
+                </div>
+            </a>
+            <div id="facultyHubsSection"></div>
+
+            <a href="settings.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-600 text-white font-bold group shadow-lg shadow-violet-900/20">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                System Settings
+            </a>
+        </nav>
+        <div class="p-6 border-t border-slate-800">
+            <div class="bg-slate-800/50 rounded-2xl p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        S</div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-white truncate user-email">Staff User</p>
+                        <p class="text-[10px] text-slate-500">Admin Access</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="text-slate-500 hover:text-red-400 focus:outline-none transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content flex-grow flex flex-col min-h-screen">
+
+        <!-- Top Bar -->
+        <header
+            class="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 px-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-slate-400 hover:text-slate-600 focus:outline-none"
+                    onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="bg-violet-50 p-2 rounded-xl text-violet-600">
+                        <i data-lucide="settings-2" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-black text-slate-900 dark:text-white leading-none">System Settings</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Configure & customize your Logbook
+                            system</p>
+                    </div>
+                </div>
+            </div>
+            <button id="saveAllBtn"
+                class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-violet-900/20 transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95 leading-none">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span class="text-sm">Save All Changes</span>
+            </button>
+        </header>
+
+        <!-- Settings Body -->
+        <div class="p-8 space-y-8 max-w-5xl mx-auto w-full">
+
+            <!-- Quick Nav Pills -->
+            <div class="flex flex-wrap gap-2">
+                <a href="#dept-section"
+                    class="text-xs font-bold px-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 dark:text-slate-300 hover:border-violet-300 hover:text-violet-600 transition-all">🏢
+                    Department</a>
+                <a href="#activity-section"
+                    class="text-xs font-bold px-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 dark:text-slate-300 hover:border-violet-300 hover:text-violet-600 transition-all">📝
+                    Activities</a>
+                <a href="#scanner-section"
+                    class="text-xs font-bold px-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 dark:text-slate-300 hover:border-violet-300 hover:text-violet-600 transition-all">🖱️
+                    Scanner &amp; UI</a>
+                <a href="#data-section"
+                    class="text-xs font-bold px-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 dark:text-slate-300 hover:border-violet-300 hover:text-violet-600 transition-all">🗄️
+                    Data &amp; Sync</a>
+                <a href="#faculty-section"
+                    class="text-xs font-bold px-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 dark:text-slate-300 hover:border-violet-300 hover:text-violet-600 transition-all">👨‍🏫
+                    Faculty</a>
+                <a href="#security-section"
+                    class="text-xs font-bold px-4 py-2 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 dark:text-slate-300 hover:border-violet-300 hover:text-violet-600 transition-all">🔐
+                    Security</a>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- Section 1: Department & Office Configuration -->
+            <!-- ============================================================ -->
+            <section id="dept-section"
+                class="settings-section bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div class="bg-blue-50 p-2 rounded-xl text-blue-600"><i data-lucide="building-2"
+                            class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg leading-none">Department & Office
+                            Configuration</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Customize office identity and school
+                            information</p>
+                    </div>
+                </div>
+                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Office
+                            Display Name</label>
+                        <input id="s_officeName" type="text" placeholder="e.g. Engineering Office"
+                            class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 dark:bg-slate-700">
+                        <p class="text-[11px] text-slate-400">Shown in the dashboard header and PDF reports.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Office
+                            ID (for data tagging)</label>
+                        <input id="s_officeId" type="text" placeholder="e.g. engineering-office"
+                            class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 dark:bg-slate-700">
+                        <p class="text-[11px] text-slate-400">Used internally to tag logs. Use lowercase with hyphens.
+                        </p>
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">School
+                            / Institution Name</label>
+                        <input id="s_schoolName" type="text" placeholder="e.g. Mindanao State University"
+                            class="w-full border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none transition-all bg-slate-50 dark:bg-slate-700">
+                        <p class="text-[11px] text-slate-400">Displayed in PDF report headers.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- Section 2: Activity & Category Management -->
+            <!-- ============================================================ -->
+            <section id="activity-section"
+                class="settings-section bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div class="bg-emerald-50 p-2 rounded-xl text-emerald-600"><i data-lucide="list-checks"
+                            class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg leading-none">Activity & Category
+                            Management</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Manage visit purpose options and form
+                            fields</p>
+                    </div>
+                </div>
+                <div class="p-8 space-y-8">
+
+                    <!-- Activity List CRUD -->
+                    <div class="space-y-3">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Purpose
+                            of Visit Options</label>
+                        <div id="activitiesList" class="space-y-2"></div>
+                        <div class="flex gap-2 mt-3">
+                            <input id="newActivityInput" type="text" placeholder="Add new activity…"
+                                class="flex-grow border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-slate-50 dark:bg-slate-700">
+                            <button id="addActivityBtn"
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400">These options appear in the "Purpose of Visit" dropdown on
+                            the scan page. Drag to reorder.</p>
+                    </div>
+
+                    <!-- Field Toggles -->
+                    <div class="border-t border-slate-100 pt-6 space-y-4">
+                        <p class="text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Form
+                            Field Control</p>
+
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Year Level Field</p>
+                                <p class="text-[11px] text-slate-400">Show year level field in registration & check-in
+                                    form</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input id="s_yearLevelEnabled" type="checkbox" class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                                </div>
+                            </label>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Year Level Required</p>
+                                <p class="text-[11px] text-slate-400">Make year level a mandatory field (only if enabled
+                                    above)</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input id="s_yearLevelRequired" type="checkbox" class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                                </div>
+                            </label>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                            <div>
+                                <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Course / Program
+                                    Required</p>
+                                <p class="text-[11px] text-slate-400">Make course/program a mandatory registration field
+                                </p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input id="s_courseRequired" type="checkbox" class="sr-only peer">
+                                <div
+                                    class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- Section 3: Scanner & UI Preferences -->
+            <!-- ============================================================ -->
+            <section id="scanner-section"
+                class="settings-section bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div class="bg-amber-50 p-2 rounded-xl text-amber-600"><i data-lucide="scan-line"
+                            class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg leading-none">Scanner & UI
+                            Preferences</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Behavior & appearance settings for
+                            the scan station</p>
+                    </div>
+                </div>
+                <div class="p-8 space-y-4">
+
+                    <div
+                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Auto-Submit on Scan</p>
+                            <p class="text-[11px] text-slate-400">Automatically log the visit without staff
+                                confirmation. Useful for high-speed scan stations.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="s_autoSubmit" type="checkbox" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                            </div>
+                        </label>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Audio Feedback on Scan</p>
+                            <p class="text-[11px] text-slate-400">Play a beep sound on successful NFC/barcode scan.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="s_audioFeedback" type="checkbox" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                            </div>
+                        </label>
+                    </div>
+
+                    <div
+                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Dark Mode</p>
+                            <p class="text-[11px] text-slate-400">Switch the interface to dark mode across all pages.
+                            </p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="s_darkMode" type="checkbox" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-violet-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-600">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- Section 4: Data & Sync Management -->
+            <!-- ============================================================ -->
+            <section id="data-section"
+                class="settings-section bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div class="bg-sky-50 p-2 rounded-xl text-sky-600"><i data-lucide="database" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg leading-none">Data & Sync
+                            Management</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Cloud sync, auto-checkout, and
+                            database tools</p>
+                    </div>
+                </div>
+                <div class="p-8 space-y-6">
+
+                    <!-- Manual Sync -->
+                    <div
+                        class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600">
+                        <div>
+                            <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">Manual Cloud Sync</p>
+                            <p class="text-[11px] text-slate-400">Force an immediate sync of all local data to Firebase
+                                now.</p>
+                        </div>
+                        <button id="manualSyncBtn"
+                            class="flex-shrink-0 bg-sky-600 hover:bg-sky-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync Now
+                        </button>
+                    </div>
+
+                    <!-- Auto-Checkout Time -->
+                    <div class="space-y-2">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Auto-Checkout
+                            Time</label>
+                        <div class="flex items-center gap-3">
+                            <input id="s_autoCheckoutTime" type="time"
+                                class="border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none bg-slate-50 dark:bg-slate-700">
+                            <button id="clearCheckoutTimeBtn"
+                                class="text-slate-400 hover:text-red-500 text-xs font-bold transition-colors">Clear</button>
+                        </div>
+                        <p class="text-[11px] text-slate-400">All students still clocked in will be automatically
+                            checked out at this time. Leave blank to disable.</p>
+                    </div>
+
+                    <!-- DB Maintenance -->
+                    <div class="border-t border-slate-100 pt-6">
+                        <div
+                            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-red-50 rounded-2xl border border-red-100">
+                            <div>
+                                <p class="font-bold text-red-800 text-sm">Clear Synced Logs</p>
+                                <p class="text-[11px] text-red-500">Permanently removes all locally cached logs that
+                                    have already been synced to the cloud. This saves disk space but is irreversible.
+                                </p>
+                            </div>
+                            <button id="maintenanceBtn"
+                                class="flex-shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> Clear Synced Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- Section 5: Faculty Management -->
+            <!-- ============================================================ -->
+            <section id="faculty-section"
+                class="settings-section bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div class="bg-purple-50 p-2 rounded-xl text-purple-600"><i data-lucide="user-round"
+                            class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg leading-none">Faculty Management
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Add or remove faculty members shown
+                            in the sidebar</p>
+                    </div>
+                </div>
+                <div class="p-8 space-y-4">
+                    <div class="space-y-3">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Faculty
+                            Members</label>
+                        <div id="facultyList" class="space-y-2"></div>
+                        <div class="flex gap-2 mt-3">
+                            <input id="newFacultyInput" type="text" placeholder="e.g. Engr. Juan Dela Cruz"
+                                class="flex-grow border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none bg-slate-50 dark:bg-slate-700">
+                            <button id="addFacultyBtn"
+                                class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
+                                <i data-lucide="plus" class="w-4 h-4"></i> Add
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Faculty names appear in the sidebar under "Faculty Hubs"
+                            and in the visit log form's staff dropdown. Save settings after making changes.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================================ -->
+            <!-- Section 6: Security & Staff Control -->
+            <!-- ============================================================ -->
+            <section id="security-section"
+                class="settings-section bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div class="bg-rose-50 p-2 rounded-xl text-rose-600"><i data-lucide="shield-check"
+                            class="w-5 h-5"></i></div>
+                    <div>
+                        <h3 class="font-black text-slate-900 dark:text-white text-lg leading-none">Security & Staff
+                            Control</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Manage authorized users and session
+                            policies</p>
+                    </div>
+                </div>
+                <div class="p-8 space-y-8">
+
+                    <!-- Authorized Staff Whitelist -->
+                    <div class="space-y-3">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Authorized
+                            Staff Emails</label>
+                        <div id="staffList" class="space-y-2"></div>
+                        <div class="flex gap-2 mt-3">
+                            <input id="newStaffInput" type="email" placeholder="staff@school.edu"
+                                class="flex-grow border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 outline-none bg-slate-50 dark:bg-slate-700">
+                            <button id="addStaffBtn"
+                                class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 text-sm">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i> Add
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Only users on this list can access the dashboard. Leave
+                            empty to allow all authenticated users.</p>
+                    </div>
+
+                    <!-- Session Timeout -->
+                    <div class="border-t border-slate-100 pt-6 space-y-2">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Session
+                            Timeout (minutes)</label>
+                        <input id="s_sessionTimeoutMinutes" type="number" min="0" step="1" placeholder="0 = disabled"
+                            class="w-full max-w-xs border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 outline-none bg-slate-50 dark:bg-slate-700">
+                        <p class="text-[11px] text-slate-400">Automatically log out staff after this many minutes of
+                            inactivity. Set to 0 to disable.</p>
+                    </div>
+
+                    <!-- Audit Log -->
+                    <div class="border-t border-slate-100 pt-6 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label
+                                class="block text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Activity
+                                Audit Log</label>
+                            <button id="refreshAuditBtn"
+                                class="text-xs font-bold text-slate-400 hover:text-violet-600 flex items-center gap-1 transition-colors">
+                                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="auditLogContainer"
+                            class="bg-slate-50 dark:bg-slate-700 rounded-2xl border border-slate-100 dark:border-slate-600 overflow-hidden max-h-72 overflow-y-auto">
+                            <table class="w-full text-xs">
+                                <thead class="bg-slate-100 dark:bg-slate-600 sticky top-0">
+                                    <tr class="text-left">
+                                        <th
+                                            class="px-4 py-3 font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">
+                                            Who</th>
+                                        <th
+                                            class="px-4 py-3 font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">
+                                            Action</th>
+                                        <th
+                                            class="px-4 py-3 font-black text-slate-500 dark:text-slate-300 uppercase tracking-widest">
+                                            When</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditLogBody">
+                                    <tr>
+                                        <td colspan="3" class="px-4 py-6 text-center text-slate-400 font-bold">Loading
+                                            audit log…</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom Save Button -->
+            <div class="flex justify-end pb-4">
+                <button id="saveAllBtnBottom"
+                    class="bg-violet-600 hover:bg-violet-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-violet-900/20 transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    Save All Changes
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast Container -->
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-[999] space-y-3 pointer-events-none"></div>
+    <template id="toastTemplate">
+        <div
+            class="toast-item pointer-events-auto flex items-center gap-3 bg-slate-900/90 text-white px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-sm min-w-[260px]">
+            <i data-lucide="check-circle" class="toast-icon w-5 h-5 text-emerald-400 flex-shrink-0"></i>
+            <p class="toast-message text-sm font-bold leading-snug"></p>
+        </div>
+    </template>
+
+    <script src="js/navigation.js"></script>
+
+    <!-- Auth + Settings JS -->
+    <script type="module">
+        import { auth } from '/js/firebase.js';
+        import { signOut } from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js';
+        import SettingsManager from '/js/settings.js';
+
+        function applyUser(email) {
+            document.querySelectorAll('.user-email').forEach(el => el.textContent = email);
+            const initial = document.querySelector('.w-8.h-8.rounded-full');
+            if (initial) initial.textContent = (email || 'S')[0].toUpperCase();
+        }
+
+        async function initPage() {
+            // 1. Check server session first (SQLite-backed — works offline)
+            try {
+                const res = await fetch('/api/auth/session');
+                const data = await res.json();
+                if (data.authenticated && data.user) {
+                    applyUser(data.user.email);
+                    window._currentUser = data.user;
+                    window.settingsManager = new SettingsManager(data.user.email);
+                    // MUST await init() so applyTheme() (DB source of truth) runs
+                    // BEFORE the user sees the page — prevents stale localStorage dark mode flash
+                    await window.settingsManager.init();
+                    return;
+                }
+            } catch (_) {
+                console.warn('Could not reach /api/auth/session — checking offline fallback.');
+            }
+
+            // 2. Offline session fallback (sessionStorage)
+            const raw = sessionStorage.getItem('offlineSession');
+            if (raw) {
+                try {
+                    const session = JSON.parse(raw);
+                    if (session && session.email) {
+                        applyUser(session.email);
+                        window._currentUser = { email: session.email };
+                        window.settingsManager = new SettingsManager(session.email);
+                        await window.settingsManager.init();
+                        return;
+                    }
+                } catch (_) { sessionStorage.removeItem('offlineSession'); }
+            }
+
+            // 3. No session — redirect to login
+            window.location.href = 'index.html';
+        }
+
+        initPage().then(() => {
+            // Initialize faculty management after settings load
+            initFacultyManager();
+        });
+
+        // Faculty management
+        let _facultyList = [];
+
+        async function loadFaculty() {
+            try {
+                const res = await fetch('/api/settings');
+                const s = await res.json();
+                _facultyList = JSON.parse(s.faculty || '[]');
+            } catch { _facultyList = []; }
+        }
+
+        async function saveFaculty() {
+            try {
+                const email = window._currentUser?.email || '';
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        settings: { faculty: JSON.stringify(_facultyList) },
+                        staffEmail: email
+                    })
+                });
+                if (window.settingsManager) window.settingsManager.showToast('Faculty list saved!');
+            } catch {
+                if (window.settingsManager) window.settingsManager.showToast('Failed to save faculty list', 'error');
+            }
+        }
+
+        function renderFacultyList() {
+            const container = document.getElementById('facultyList');
+            if (!container) return;
+            if (_facultyList.length === 0) {
+                container.innerHTML = `<p class="text-[11px] text-slate-400 italic px-1">No faculty added yet. Use the input below to add.</p>`;
+                return;
+            }
+            container.innerHTML = _facultyList.map((name, i) => `
+                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-black">${(name[0] || 'F').toUpperCase()}</div>
+                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200">${name.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                    </div>
+                    <button data-fi="${i}" class="remove-faculty-btn text-slate-300 hover:text-red-500 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+            container.querySelectorAll('.remove-faculty-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const idx = parseInt(btn.dataset.fi);
+                    _facultyList.splice(idx, 1);
+                    renderFacultyList();
+                    await saveFaculty();
+                });
+            });
+        }
+
+        async function initFacultyManager() {
+            await loadFaculty();
+            renderFacultyList();
+            document.getElementById('addFacultyBtn')?.addEventListener('click', async () => {
+                const input = document.getElementById('newFacultyInput');
+                const name = (input?.value || '').trim();
+                if (!name) return;
+                if (_facultyList.includes(name)) {
+                    if (window.settingsManager) window.settingsManager.showToast('Faculty already exists', 'error');
+                    return;
+                }
+                _facultyList.push(name);
+                if (input) input.value = '';
+                renderFacultyList();
+                await saveFaculty();
+            });
+            document.getElementById('newFacultyInput')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); document.getElementById('addFacultyBtn')?.click(); }
+            });
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (_) { }
+            sessionStorage.removeItem('offlineSession');
+            try { if (auth) await signOut(auth); } catch (_) { }
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+
+</html>

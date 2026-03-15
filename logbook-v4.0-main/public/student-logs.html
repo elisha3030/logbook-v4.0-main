@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Logbook System - Student Logbook</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script src="/js/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-sans min-h-screen flex flex-col">
+    <!-- Mesh Gradient Background -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[120px]"></div>
+        <div class="absolute top-[20%] -right-[5%] w-[35%] h-[35%] rounded-full bg-emerald-50/50 blur-[120px]"></div>
+        <div class="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-slate-100/50 blur-[120px]"></div>
+    </div>
+
+    <!-- Header -->
+    <header
+        class="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-4">
+            <a href="portal.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="bg-blue-600 p-2 rounded-xl text-white">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight">Student Logbook<span
+                        class="text-blue-500">.</span></span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="portal.html"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Portal
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col p-8 max-w-6xl mx-auto w-full">
+        <!-- Scan Prompt (Shown initially) -->
+        <div id="scanPrompt" class="flex-grow flex flex-col items-center justify-center space-y-8 py-20">
+            <div class="relative w-40 h-40">
+                <div class="absolute inset-0 bg-blue-100 dark:bg-blue-900/40 rounded-full animate-ping opacity-20">
+                </div>
+                <div
+                    class="relative bg-white dark:bg-slate-800 w-40 h-40 rounded-[2.5rem] flex items-center justify-center shadow-2xl border border-slate-100 dark:border-slate-700">
+                    <i data-lucide="scan" class="w-20 h-20 text-blue-500"></i>
+                </div>
+            </div>
+            <div class="text-center space-y-4">
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Identify Yourself</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-sm">Please scan your NFC card to
+                    start your transaction.</p>
+            </div>
+            <div
+                class="inline-flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-slate-200">
+                <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                Waiting for Scanner Input...
+            </div>
+
+            <!-- Manual Entry Section -->
+            <div id="manualEntrySection"
+                class="w-full max-w-sm pt-8 border-t border-slate-100 dark:border-slate-800 transition-all duration-500">
+                <!-- Initial Manual Entry Button -->
+                <div id="manualEntryInitial" class="flex flex-col gap-4">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">No card?
+                    </p>
+                    <button id="showManualFormBtn"
+                        class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-black py-4 px-6 rounded-2xl border border-slate-200 dark:border-slate-700 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        <i data-lucide="keyboard" class="w-5 h-5"></i>
+                        Enter Details Manually
+                    </button>
+                </div>
+
+                <!-- Expanded Manual Form (Hidden initially) -->
+                <div id="manualEntryForm"
+                    class="hidden flex flex-col gap-5 animate-in slide-in-from-top-4 duration-300">
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Full
+                                Name</label>
+                            <input type="text" id="manualName" placeholder="Juan Dela Cruz"
+                                class="w-full px-5 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm shadow-sm">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Student
+                                ID</label>
+                            <input type="text" id="manualId" placeholder="22-0693-680"
+                                class="w-full px-5 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm shadow-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1.5">
+                                <label
+                                    class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Program</label>
+                                <input type="text" id="manualProgram" placeholder="BSME"
+                                    class="w-full px-5 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm shadow-sm">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label
+                                    class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Year</label>
+                                <input type="text" id="manualYear" placeholder="2nd Year"
+                                    class="w-full px-5 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold text-sm shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="cancelManualBtn"
+                            class="flex-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 font-bold py-4 rounded-xl transition-all active:scale-95 text-xs uppercase tracking-widest">
+                            Cancel
+                        </button>
+                        <button id="submitManualBtn"
+                            class="flex-[2] bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95 text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+                            Proceed
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time-Out Prompt (Hidden until active session detected) -->
+        <div id="timeOutPrompt"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="relative">
+                <div class="absolute -inset-4 bg-emerald-100 dark:bg-emerald-900/40 rounded-full blur-xl animate-pulse">
+                </div>
+                <div
+                    class="relative bg-white dark:bg-slate-800 w-32 h-32 rounded-[2rem] flex items-center justify-center shadow-2xl border-4 border-emerald-500">
+                    <i data-lucide="clock" class="w-16 h-16 text-emerald-500"></i>
+                </div>
+            </div>
+
+            <div class="text-center space-y-4">
+                <div id="statusBadge"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800 animate-pulse">
+                    <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Waiting for Staff...</span>
+                </div>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Already Logged In</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-sm">Welcome back, <span
+                        id="timeOutStudentName" class="text-emerald-600 font-black">Student</span>! Your activity is
+                    currently being processed.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl px-4">
+                <button id="confirmTimeOutBtn" disabled
+                    class="group relative bg-slate-200 dark:bg-slate-700 text-slate-400 p-8 rounded-[2rem] shadow-xl transition-all cursor-not-allowed opacity-50 flex flex-col items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-slate-300 dark:bg-slate-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="log-out" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl font-black">Time Out Now</p>
+                        <p id="timeOutSubtext" class="text-[10px] font-bold opacity-80 uppercase tracking-widest">
+                            Awaiting Verification</p>
+                    </div>
+                </button>
+
+                <button id="ignoreTimeOutBtn"
+                    class="group bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-blue-900/5 hover:shadow-blue-900/10 hover:-translate-y-1 transition-all active:scale-95 flex flex-col items-center gap-4 text-center">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl font-black text-slate-900 dark:text-white">New Visit</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Start Another
+                            Transaction</p>
+                    </div>
+                </button>
+            </div>
+
+            <button id="cancelTimeOutBtn"
+                class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                Cancel & Go Back
+            </button>
+        </div>
+
+        <!-- Activity Selection (Hidden until scanned) -->
+        <div id="activitySelection"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500">Step 2 of 4</p>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Select Transaction</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">What brings you to the office today,
+                    <span id="scannedStudentFirstName" class="text-blue-600 font-black">Student</span>?
+                </p>
+            </div>
+
+            <div id="activityGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+                <!-- Activity Buttons will be injected via JS -->
+            </div>
+
+            <button id="cancelActivityBtn"
+                class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                Cancel & Go Back
+            </button>
+        </div>
+
+        <!-- Details Selection (Hidden until activity selected) -->
+        <div id="detailsSelection"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-violet-500">Step 3 of 4</p>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Transaction Details</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please provide more details about your
+                    <span id="detailsActivityName" class="text-violet-600 font-black">activity</span>.
+                </p>
+            </div>
+
+            <div
+                class="w-full max-w-xl space-y-4 p-8 bg-white dark:bg-slate-800 rounded-[2.5rem] border border-violet-100 dark:border-violet-900/30 shadow-xl">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Specific
+                    Purpose (e.g. Type of document, reason for visit)</label>
+                <div class="flex flex-col gap-3">
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <select id="transactionDetailsSelect"
+                            class="flex-grow px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-violet-500/5 focus:border-violet-500 outline-none transition-all font-bold cursor-pointer">
+                            <option value="" disabled selected>Select details...</option>
+                        </select>
+                        <button id="submitDetailsBtn"
+                            class="bg-violet-600 hover:bg-violet-700 text-white font-black px-8 py-4 sm:py-0 rounded-2xl shadow-lg transition-all active:scale-95 whitespace-nowrap">
+                            Continue
+                        </button>
+                    </div>
+                    <input type="text" id="transactionDetailsInput" placeholder="Please specify your purpose..."
+                        class="hidden w-full px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-violet-500/5 focus:border-violet-500 outline-none transition-all font-bold">
+                </div>
+            </div>
+
+            <div class="flex gap-8">
+                <button id="backToActivityFromDetailsBtn"
+                    class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                    ← Back to Activities
+                </button>
+                <button id="skipDetailsBtn"
+                    class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                    Skip this step →
+                </button>
+            </div>
+        </div>
+
+        <!-- Faculty Selection (Hidden until activity selected) -->
+        <div id="facultySelection"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500">Step 3 of 3</p>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Visit In-Charge</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Who are you visiting for this
+                    <span id="selectedActivityName" class="text-emerald-600 font-black">activity</span>?
+                </p>
+            </div>
+
+            <div id="facultyGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+                <!-- Faculty Buttons will be injected via JS -->
+            </div>
+
+            <button id="backToActivityBtn"
+                class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                ← Back to Activities
+            </button>
+        </div>
+
+        <!-- Log History (Hidden until scanned) -->
+        <div id="logContent" class="hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <!-- Student Profile Summary -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div class="p-8 flex flex-col md:flex-row items-center gap-8">
+                    <div
+                        class="w-24 h-24 rounded-3xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 border-2 border-slate-50 dark:border-slate-700 flex-shrink-0">
+                        <i data-lucide="user" class="w-12 h-12"></i>
+                    </div>
+                    <div class="text-center md:text-left space-y-4 flex-grow">
+                        <div>
+                            <p
+                                class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-300 mb-1">
+                                Authenticated Student</p>
+                            <h3 id="studentName"
+                                class="text-3xl font-black text-slate-900 dark:text-white leading-none">---</h3>
+                        </div>
+                        <div class="flex flex-wrap gap-3 justify-center md:justify-start">
+                            <div
+                                class="bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-600">
+                                <p
+                                    class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-300 mb-0.5">
+                                    Student ID</p>
+                                <p id="studentIdDisplay" class="font-bold text-slate-700 dark:text-slate-100 text-xs">
+                                    ---</p>
+                            </div>
+                            <div
+                                class="bg-slate-50 dark:bg-slate-700 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-600">
+                                <p
+                                    class="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-300 mb-0.5">
+                                    Program</p>
+                                <p id="studentProgram" class="font-bold text-slate-700 dark:text-slate-100 text-xs">---
+                                </p>
+                            </div>
+                            <button id="proceedToTransactionBtn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl border border-blue-500 text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                                <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5"></i>
+                                Proceed to Transaction
+                            </button>
+                            <button id="switchStudentBtn"
+                                class="bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                Switch User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personalized Logs Table -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                <div
+                    class="px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-xl text-blue-600">
+                            <i data-lucide="list" class="w-5 h-5"></i>
+                        </div>
+                        <h5 class="text-lg font-black text-slate-800 dark:text-white tracking-tight">Personal Visit
+                            History</h5>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden relative flex flex-col h-[400px]">
+                    <div class="overflow-y-auto flex-grow rounded-b-[2.5rem]">
+                        <table class="w-full text-left relative">
+                            <thead
+                                class="bg-slate-50 dark:bg-slate-700/80 backdrop-blur-md text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-300 border-b border-slate-100 dark:border-slate-600 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-8 py-5">Date & Time</th>
+                                    <th class="px-6 py-5">Activity / Purpose</th>
+                                    <th class="px-6 py-5 text-center">Status</th>
+                                    <th class="px-8 py-5 text-right">In-Charge</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody" class="divide-y divide-slate-50 dark:divide-slate-700">
+                                <!-- Populated via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="noLogsMessage" class="hidden p-20 text-center">
+                    <div
+                        class="bg-slate-50 dark:bg-slate-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                        <i data-lucide="history" class="w-8 h-8"></i>
+                    </div>
+                    <p class="text-slate-500 dark:text-slate-400 font-bold">No visit records found yet.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="p-8 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] space-y-2 mt-auto">
+        <p>Logbook System v2.1</p>
+        <p>Secure Personal Records Access</p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none items-end">
+    </div>
+    <template id="toastTemplate">
+        <div
+            class="toast-item flex items-center gap-4 bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in slide-in-from-right-8 duration-300 min-w-[320px]">
+            <div class="toast-icon-container p-2 rounded-xl bg-white/10">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 toast-icon"></i>
+            </div>
+            <div class="flex-grow">
+                <p class="toast-message font-bold text-sm tracking-tight leading-tight"></p>
+            </div>
+        </div>
+    </template>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/student-logs.js"></script>
+</body>
+
+</html>

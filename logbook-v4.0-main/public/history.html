@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Logbook System - Audit History</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'selector'
+        }
+    </script>
+    <script src="/js/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar {
+            width: 280px;
+            transition: all 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 100;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        /* Toast Animations */
+        .toast-item {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-item.fade-out {
+            opacity: 0;
+            transform: translateX(1rem) scale(0.9);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white font-sans min-h-screen flex">
+    <!-- Sidebar Navigation -->
+    <aside
+        class="sidebar bg-slate-900 h-screen fixed left-0 top-0 text-slate-400 flex flex-col border-r border-slate-800 shadow-2xl z-50">
+        <div class="p-6 border-b border-slate-800 mb-6">
+            <a href="dashboard.html" class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl text-white">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-black text-white tracking-tight">Logbook<span
+                        class="text-blue-500">.</span></span>
+            </a>
+        </div>
+        <nav class="flex-grow px-4 space-y-2">
+            <div class="mb-4">
+                <a href="portal.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest text-emerald-500 bg-emerald-500/5 border border-emerald-500/20 group">
+                    <i data-lucide="layout-grid" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                    Back to Portal
+                </a>
+            </div>
+
+            <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Main Menu</div>
+            <a href="dashboard.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-blue-400"></i> Dashboard
+            </a>
+            <a href="scan.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="scan" class="w-5 h-5 group-hover:text-blue-400"></i> Scan ID
+            </a>
+            <a href="history.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20">
+                <i data-lucide="history" class="w-5 h-5"></i> Log History
+            </a>
+            <div class="pt-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Management
+            </div>
+            <a href="students.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="users" class="w-5 h-5 group-hover:text-amber-400 transition-colors"></i>
+                    Student Records
+                </div>
+            </a>
+
+            <div id="facultyHubsSection"></div>
+
+            <a href="settings.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-violet-400 transition-colors"></i>
+                System Settings
+            </a>
+        </nav>
+        <div class="p-6 border-t border-slate-800">
+            <div class="bg-slate-800/50 rounded-2xl p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold leading-none">
+                        S</div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-white truncate user-email">Staff User</p>
+                        <p class="text-[10px] text-slate-500">Admin Access</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="text-slate-500 hover:text-red-400 transition-colors"><i
+                        data-lucide="log-out" class="w-4 h-4"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content flex-grow flex flex-col min-h-screen">
+        <header
+            class="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8 flex items-center justify-between sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-slate-400 hover:text-slate-600 focus:outline-none"
+                    onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <h2 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Audit Logs</h2>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="exportHistoryBtn"
+                    class="bg-slate-900 hover:bg-black text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-slate-200 transition-all flex items-center gap-2 transform active:scale-95">
+                    <i data-lucide="download" class="w-4 h-4"></i> <span class="text-sm">Export Data</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-8">
+            <!-- Filter Panel -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-700 p-8">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-2xl text-emerald-600">
+                        <i data-lucide="filter" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white leading-none">Advanced Filtering
+                        </h4>
+                        <p
+                            class="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mt-1">
+                            Refine your audit
+                            results</p>
+                    </div>
+                </div>
+
+                <form id="historyFilterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="space-y-2 lg:col-span-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Search
+                            Records</label>
+                        <div class="relative">
+                            <i data-lucide="search"
+                                class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="historySearch" placeholder="Name, NFC chip, or Student ID..."
+                                class="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200 dark:placeholder-slate-400">
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Start
+                            Date</label>
+                        <input type="date" id="startDate"
+                            class="w-full px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">End
+                            Date</label>
+                        <input type="date" id="endDate"
+                            class="w-full px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Activity
+                            Type</label>
+                        <div class="relative">
+                            <select id="activityFilter"
+                                class="w-full px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:border-blue-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200 appearance-none">
+                                <option value="">All Transactions</option>
+                                <option value="Enrollment Concern">Enrollment Concern</option>
+                                <option value="Document Request">Document Request</option>
+                                <option value="Financial Concern">Financial Concern</option>
+                                <option value="Inquiry">Inquiry</option>
+                                <option value="Others">Others</option>
+                            </select>
+                            <i data-lucide="chevron-down"
+                                class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Year
+                            Level</label>
+                        <div class="relative">
+                            <select id="yearLevelFilter"
+                                class="w-full px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:border-blue-500 outline-none transition-all font-bold text-slate-700 dark:text-slate-200 appearance-none">
+                                <option value="">Any Year</option>
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                            </select>
+                            <i data-lucide="chevron-down"
+                                class="absolute right-6 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 flex items-end gap-3">
+                        <button type="submit"
+                            class="flex-grow bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-900/20 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i> Apply Filters
+                        </button>
+                        <button type="reset" id="resetHistoryFilters"
+                            class="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-2xl transition-all"><i
+                                data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Results Table -->
+            <div
+                class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-slate-50 dark:bg-slate-700 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-300 border-b border-slate-100 dark:border-slate-600">
+                            <tr>
+                                <th class="px-8 py-5">Timestamp & Date</th>
+                                <th class="px-8 py-5">Visitor Information</th>
+                                <th class="px-6 py-5 text-center">Year Level</th>
+                                <th class="px-6 py-5">Activity</th>
+                                <th class="px-6 py-5 text-center">Duration</th>
+                                <th class="px-6 py-5 text-center">Status</th>
+                                <th class="px-8 py-5 text-right">Handled By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-50 dark:divide-slate-700">
+                            <tr>
+                                <td colspan="6" class="px-8 py-32 text-center">
+                                    <div class="flex flex-col items-center justify-center animate-pulse">
+                                        <div class="bg-slate-100 w-16 h-16 rounded-full mb-6"></div>
+                                        <div class="h-4 bg-slate-100 rounded-full w-48 mb-3"></div>
+                                        <div class="h-3 bg-slate-50 rounded-full w-64"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <div class="p-10 border-t border-slate-50 dark:border-slate-700 flex items-center justify-center">
+                    <ul id="historyPagination" class="flex items-center gap-2"></ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none items-end">
+        <!-- Toasts will be injected here -->
+    </div>
+
+    <template id="toastTemplate">
+        <div
+            class="toast-item flex items-center gap-4 bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in slide-in-from-right-8 duration-300 min-w-[320px]">
+            <div class="toast-icon-container p-2 rounded-xl bg-white/10">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 toast-icon"></i>
+            </div>
+            <div class="flex-grow">
+                <p class="toast-message font-bold text-sm tracking-tight leading-tight"></p>
+            </div>
+        </div>
+    </template>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/history.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const tableBody = document.getElementById('historyTableBody');
+            if (tableBody) {
+                const observer = new MutationObserver(() => lucide.createIcons());
+                observer.observe(tableBody, { childList: true });
+            }
+        });
+    </script>
+</body>
+
+</html>
