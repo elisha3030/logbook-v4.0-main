@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Logbook System - Welcome Portal</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script src="/js/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-sans min-h-screen selection:bg-blue-100 selection:text-blue-900">
+    <!-- Mesh Gradient Background -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[120px]"></div>
+        <div class="absolute top-[20%] -right-[5%] w-[35%] h-[35%] rounded-full bg-emerald-50/50 blur-[120px]"></div>
+        <div class="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-slate-100/50 blur-[120px]"></div>
+    </div>
+
+    <div class="min-h-screen flex flex-col p-6 lg:p-12">
+        <!-- Header -->
+        <header class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl text-white">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight">Logbook<span class="text-blue-500">.</span></span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex flex-col items-end">
+                    <p class="text-xs font-bold text-slate-900 dark:text-white user-email">Staff User</p>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Authorized Access</p>
+                </div>
+                <button id="logoutBtn"
+                    class="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:text-red-500 transition-all">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow flex flex-col items-center justify-center max-w-6xl mx-auto w-full">
+            <div class="text-center mb-16 space-y-4">
+                <h1 class="text-5xl font-black text-slate-900 dark:text-white tracking-tight">Select User Role</h1>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-xl">Multiple roles, one seamless
+                    entry. Choose a category below to proceed to the logbook recording system.</p>
+            </div>
+
+            <!-- Portal Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full">
+                <!-- Role Card: Student -->
+                <a href="student-logs.html"
+                    class="group bg-white dark:bg-slate-800 p-8 h-full rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-blue-900/5 hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="graduation-cap" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-xl font-black mb-2 tracking-tight">Student</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Enrollment & Logs</p>
+                </a>
+
+                <!-- Role Card: Parent -->
+                <a href="parents.html"
+                    class="group bg-white dark:bg-slate-800 p-8 h-full rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-emerald-900/5 hover:shadow-emerald-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="users" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-xl font-black mb-2 tracking-tight">Parent</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Inquiry & Visits</p>
+                </a>
+
+                <!-- Role Card: Faculty -->
+                <a href="scan.html"
+                    class="group bg-white dark:bg-slate-800 p-8 h-full rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-amber-900/5 hover:shadow-amber-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="briefcase" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-xl font-black mb-2 tracking-tight">Faculty</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Staff Entrance</p>
+                </a>
+
+                <!-- Role Card: Visitor -->
+                <a href="visitor.html"
+                    class="group bg-white dark:bg-slate-800 p-8 h-full rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-violet-900/5 hover:shadow-violet-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-violet-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="user-plus" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-xl font-black mb-2 tracking-tight">Visitor</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Outside Guest</p>
+                </a>
+
+                <!-- Role Card: Employee -->
+                <a href="employee.html"
+                    class="group bg-white dark:bg-slate-800 p-8 h-full rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-900/5 hover:shadow-slate-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-slate-900 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="contact" class="w-10 h-10"></i>
+                    </div>
+                    <h2 class="text-xl font-black mb-2 tracking-tight">Employee</h2>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Non-Academic</p>
+                </a>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] space-y-2">
+            <p>Logbook System v2.1</p>
+            <p>Engineering Department Portal</p>
+        </footer>
+    </div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        });
+
+        function showNotImplemented(role) {
+            alert(role + " feature hasn't been implemented yet.");
+        }
+    </script>
+</body>
+
+</html>

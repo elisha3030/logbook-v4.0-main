@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Faculty Hub - Logbook System</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'selector'
+        }
+    </script>
+    <script src="/js/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .sidebar {
+            width: 280px;
+            transition: all 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+                position: fixed;
+                z-index: 100;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .toast-item {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast-item.fade-out {
+            opacity: 0;
+            transform: translateX(1rem) scale(0.9);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white font-sans min-h-screen flex">
+
+    <!-- Sidebar Navigation -->
+    <aside
+        class="sidebar bg-slate-900 h-screen fixed left-0 top-0 text-slate-400 flex flex-col border-r border-slate-800 shadow-2xl z-50">
+        <!-- Logo Area -->
+        <div class="p-6 border-b border-slate-800 mb-6">
+            <a href="dashboard.html" class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl text-white">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-black text-white tracking-tight">Logbook<span
+                        class="text-blue-500">.</span></span>
+            </a>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="flex-grow px-4 space-y-2 overflow-y-auto pb-4">
+            <div class="mb-4">
+                <a href="portal.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest text-emerald-500 bg-emerald-500/5 border border-emerald-500/20 group">
+                    <i data-lucide="layout-grid" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                    Back to Portal
+                </a>
+            </div>
+
+            <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Main Menu</div>
+
+            <a href="dashboard.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
+                Dashboard
+            </a>
+
+            <a href="scan.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="scan" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
+                Scan ID
+            </a>
+
+            <a href="history.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="history" class="w-5 h-5 group-hover:text-emerald-400 transition-colors"></i>
+                    Log History
+                </div>
+            </a>
+
+            <div class="pt-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Management
+            </div>
+
+            <a href="students.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="users" class="w-5 h-5 group-hover:text-amber-400 transition-colors"></i>
+                    Student Records
+                </div>
+            </a>
+
+            <!-- Faculty Hubs section injected here by navigation.js -->
+            <div id="facultyHubsSection"></div>
+
+            <a href="settings.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-violet-400 transition-colors"></i>
+                System Settings
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="p-6 border-t border-slate-800">
+            <div class="bg-slate-800/50 rounded-2xl p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        S
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-white truncate user-email">Staff User</p>
+                        <p class="text-[10px] text-slate-500">Admin Access</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="text-slate-500 hover:text-red-400 focus:outline-none transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content flex-grow flex flex-col min-h-screen">
+
+        <!-- Top Navigation Bar -->
+        <header
+            class="h-20 bg-white border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700 sticky top-0 z-40 px-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-slate-400 hover:text-slate-600 focus:outline-none"
+                    onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="bg-purple-50 dark:bg-purple-900/30 p-2 rounded-xl text-purple-600 dark:text-purple-400">
+                        <i data-lucide="user-round" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 id="facultyNameHeader"
+                            class="text-lg font-black text-slate-800 dark:text-white tracking-tight">Faculty Hub</h2>
+                        <p
+                            class="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest leading-none">
+                            Pending Student Queue</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="downloadPdfBtn"
+                    class="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-bold px-4 py-2.5 rounded-xl transition-all text-sm shadow-lg shadow-violet-900/20">
+                    <i data-lucide="file-down" class="w-4 h-4"></i>
+                    PDF Report
+                </button>
+                <button id="refreshBtn"
+                    class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition-all text-sm">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Body -->
+        <div class="p-8 space-y-6">
+
+            <!-- Faculty name not provided state -->
+            <div id="noFacultyState" class="hidden flex-grow flex flex-col items-center justify-center py-20">
+                <div class="text-center mb-12">
+                    <div class="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-[2rem] flex items-center justify-center mx-auto mb-6">
+                        <i data-lucide="users" class="w-10 h-10 text-blue-600 dark:text-blue-400"></i>
+                    </div>
+                    <h2 class="text-4xl font-black text-slate-800 dark:text-white tracking-tight">Faculty Hub</h2>
+                    <p class="text-slate-500 dark:text-slate-400 font-medium text-lg mt-2">Please select your name to manage your student queue.</p>
+                </div>
+
+                <div id="facultySelectionGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Stats row -->
+            <div id="statsRow" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4">
+                    <div class="bg-amber-100 dark:bg-amber-900/30 p-3 rounded-xl text-amber-600 dark:text-amber-400">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Pending</p>
+                        <p id="statPending" class="text-3xl font-black text-slate-900 dark:text-white">0</p>
+                    </div>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4">
+                    <div
+                        class="bg-emerald-100 dark:bg-emerald-900/30 p-3 rounded-xl text-emerald-600 dark:text-emerald-400">
+                        <i data-lucide="check-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Completed</p>
+                        <p id="statCompleted" class="text-3xl font-black text-slate-900 dark:text-white">0</p>
+                    </div>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 flex items-center gap-4">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-xl text-blue-600 dark:text-blue-400">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Today</p>
+                        <p id="statTotal" class="text-3xl font-black text-slate-900 dark:text-white">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Report Card -->
+            <div id="summaryCard"
+                class="hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div
+                    class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="bg-violet-100 dark:bg-violet-900/30 p-2 rounded-xl text-violet-600 dark:text-violet-400">
+                            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                        </div>
+                        <h5 class="text-base font-black text-slate-800 dark:text-white tracking-tight">Today's Summary
+                        </h5>
+                    </div>
+                    <span id="summaryDate"
+                        class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"></span>
+                </div>
+                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Activity Breakdown -->
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Visits by
+                            Activity</p>
+                        <div id="summaryActivityList" class="space-y-3">
+                            <div class="animate-pulse h-4 bg-slate-100 rounded-full w-full"></div>
+                            <div class="animate-pulse h-4 bg-slate-100 rounded-full w-3/4"></div>
+                            <div class="animate-pulse h-4 bg-slate-100 rounded-full w-1/2"></div>
+                        </div>
+                    </div>
+                    <!-- Completion + Wait Time -->
+                    <div class="space-y-4">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Performance</p>
+                        <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 flex items-center gap-4">
+                            <div
+                                class="bg-emerald-100 dark:bg-emerald-900/40 p-3 rounded-xl text-emerald-600 dark:text-emerald-400 flex-shrink-0">
+                                <i data-lucide="percent" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Completion
+                                    Rate</p>
+                                <p id="summaryCompletionRate"
+                                    class="text-2xl font-black text-slate-900 dark:text-white">—</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 flex items-center gap-4">
+                            <div
+                                class="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-xl text-blue-600 dark:text-blue-400 flex-shrink-0">
+                                <i data-lucide="timer" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Avg. Visit
+                                    Duration</p>
+                                <p id="summaryAvgDuration" class="text-2xl font-black text-slate-900 dark:text-white">—
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 dark:bg-slate-700 rounded-2xl p-5 flex items-center gap-4">
+                            <div
+                                class="bg-amber-100 dark:bg-amber-900/40 p-3 rounded-xl text-amber-600 dark:text-amber-400 flex-shrink-0">
+                                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Busiest Hour
+                                </p>
+                                <p id="summaryBusiestHour" class="text-2xl font-black text-slate-900 dark:text-white">—
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Queue Table -->
+            <div id="queueCard"
+                class="hidden bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div
+                    class="px-8 py-5 border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between">
+                    <h5 class="text-base font-black text-slate-800 dark:text-white tracking-tight">Student Queue</h5>
+                    <span id="lastRefreshed" class="text-[10px] text-slate-400 italic"></span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-slate-50 dark:bg-slate-700 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 border-b border-slate-100 dark:border-slate-600">
+                            <tr>
+                                <th class="px-8 py-4">Student</th>
+                                <th class="px-6 py-4">Activity</th>
+                                <th class="px-6 py-4">Checked In</th>
+                                <th class="px-6 py-4">Duration</th>
+                                <th class="px-6 py-4 text-center">Status</th>
+                                <th class="px-8 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueTableBody" class="divide-y divide-slate-50 dark:divide-slate-700">
+                            <tr>
+                                <td colspan="5" class="px-8 py-16 text-center">
+                                    <div class="flex flex-col items-center justify-center animate-pulse">
+                                        <div class="bg-slate-100 w-12 h-12 rounded-full mb-4"></div>
+                                        <div class="h-4 bg-slate-100 rounded w-32 mb-2"></div>
+                                        <div class="h-3 bg-slate-50 rounded w-48"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none items-end">
+    </div>
+
+    <template id="toastTemplate">
+        <div
+            class="toast-item flex items-center gap-4 bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in slide-in-from-right-8 duration-300 min-w-[320px]">
+            <div class="toast-icon-container p-2 rounded-xl bg-white/10">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 toast-icon"></i>
+            </div>
+            <div class="flex-grow">
+                <p class="toast-message font-bold text-sm tracking-tight leading-tight"></p>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/jspdf.js"></script>
+    <script src="js/jspdf-autotable.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/faculty.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const tableBody = document.getElementById('queueTableBody');
+            if (tableBody) {
+                const observer = new MutationObserver(() => lucide.createIcons());
+                observer.observe(tableBody, { childList: true });
+            }
+        });
+    </script>
+</body>
+
+</html>

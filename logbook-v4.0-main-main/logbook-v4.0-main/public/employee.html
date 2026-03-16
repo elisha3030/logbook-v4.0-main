@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Logbook System - Employee Kiosk</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script src="/js/lucide.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-sans min-h-screen flex flex-col">
+    <!-- Mesh Gradient Background -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-100/50 blur-[120px]"></div>
+        <div class="absolute top-[20%] -right-[5%] w-[35%] h-[35%] rounded-full bg-slate-200/50 blur-[120px]"></div>
+        <div class="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-slate-100/50 blur-[120px]"></div>
+    </div>
+
+    <!-- Header -->
+    <header
+        class="h-20 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-8 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-4">
+            <a href="portal.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="bg-slate-900 dark:bg-slate-100 dark:text-slate-900 p-2 rounded-xl text-white">
+                    <i data-lucide="contact" class="w-6 h-6"></i>
+                </div>
+                <span class="text-xl font-black tracking-tight">Employee Portal<span
+                        class="text-slate-500">.</span></span>
+            </a>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="portal.html"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Portal
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col p-8 max-w-4xl mx-auto w-full">
+        <!-- Step 0: Mode Selection -->
+        <div id="modeSelectionStep"
+            class="flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-4">
+                <div
+                    class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 mb-4">
+                    <i data-lucide="hand" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Hello there!</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Are you arriving or leaving the
+                    department?</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-2xl px-4">
+                <button id="modeArrivalBtn"
+                    class="group bg-white dark:bg-slate-800 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/5 hover:border-slate-500 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center gap-6 text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900 transition-all duration-500">
+                        <i data-lucide="log-in" class="w-10 h-10"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-black text-slate-900 dark:text-white">I am Arriving</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Clock In
+                        </p>
+                    </div>
+                </button>
+
+                <button id="modeDepartureBtn"
+                    class="group bg-white dark:bg-slate-800 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/5 hover:border-slate-900 dark:hover:border-white hover:-translate-y-2 transition-all duration-500 flex flex-col items-center gap-6 text-center">
+                    <div
+                        class="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white dark:group-hover:text-slate-900 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="log-out" class="w-10 h-10"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-black text-slate-900 dark:text-white">I am Leaving</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Clock Out
+                        </p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 1: Employee Information (Arrival) -->
+        <div id="employeeInfoStep"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-4">
+                <div
+                    class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 text-slate-600 mb-4">
+                    <i data-lucide="user-square" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Employee Registration</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-sm mx-auto">Please select your
+                    role and enter your name.</p>
+            </div>
+
+            <div
+                class="w-full max-w-xl space-y-8 p-10 bg-white dark:bg-slate-800 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-2xl">
+
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label
+                            class="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-300 ml-1">Employee
+                            Type</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="typeFacultyBtn"
+                                class="employee-type-btn active bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-2 border-slate-900 dark:border-slate-100 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all">
+                                <i data-lucide="briefcase" class="w-4 h-4"></i> Faculty
+                            </button>
+                            <button id="typeNonFacultyBtn"
+                                class="employee-type-btn bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-600 py-4 px-6 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-600 transition-all">
+                                <i data-lucide="user-cog" class="w-4 h-4"></i> Non-Faculty
+                            </button>
+                        </div>
+                        <input type="hidden" id="employeeType" value="Faculty">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="employeeName"
+                            class="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-300 ml-1">Full
+                            Name</label>
+                        <input type="text" id="employeeName" placeholder="e.g. John Doe"
+                            class="block w-full px-6 py-4.5 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500 outline-none transition-all font-bold text-lg">
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-4">
+                    <button id="toPurposeBtn"
+                        class="w-full bg-slate-900 dark:bg-white hover:bg-black dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black py-5 px-10 rounded-2xl shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95 text-lg">
+                        Next Section
+                        <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                    </button>
+                    <button id="backToModeFromInfoBtn"
+                        class="text-slate-400 hover:text-slate-600 font-bold text-xs uppercase tracking-widest transition-all">
+                        ← Not arriving? Change mode
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Checkout Selection (Departure) -->
+        <div id="checkoutStep"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+            <div class="text-center space-y-4">
+                <div
+                    class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-50 dark:bg-slate-700 text-slate-600 mb-4">
+                    <i data-lucide="navigation" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Active Employees</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please tap your name to clock out.</p>
+            </div>
+
+            <div id="activeEmployeesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                <!-- Injected via JS -->
+            </div>
+
+            <button id="backToModeFromCheckoutBtn"
+                class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                ← Go Back
+            </button>
+        </div>
+
+        <!-- Step 2: Nature of Log (Arrival) -->
+        <div id="purposeStep"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+            <div class="text-center space-y-4">
+                <div
+                    class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 text-slate-600 mb-4">
+                    <i data-lucide="circle-dot" class="w-10 h-10"></i>
+                </div>
+                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Nature of Log</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please select the reason for clocking
+                    in.</p>
+            </div>
+
+            <div id="purposeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
+                <!-- Injected via JS -->
+            </div>
+
+            <button id="backToInfoBtn"
+                class="text-slate-400 hover:text-slate-600 font-bold text-sm uppercase tracking-widest transition-all">
+                ← Go Back
+            </button>
+        </div>
+
+        <!-- Completion Step -->
+        <div id="completionStep"
+            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="relative">
+                <div class="absolute -inset-8 bg-slate-200 dark:bg-slate-700 rounded-full blur-2xl animate-pulse">
+                </div>
+                <div
+                    class="relative bg-white dark:bg-slate-800 w-32 h-32 rounded-[2.5rem] flex items-center justify-center shadow-2xl border-4 border-slate-900 dark:border-white">
+                    <i data-lucide="check-circle" class="w-16 h-16 text-slate-900 dark:text-white"></i>
+                </div>
+            </div>
+
+            <div class="text-center space-y-4">
+                <h2 id="completionTitle" class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                    Record Saved!</h2>
+                <p id="completionMessage"
+                    class="text-slate-500 dark:text-slate-400 font-medium text-lg max-w-sm mx-auto">Thank you.</p>
+            </div>
+
+            <button onclick="window.location.href='portal.html'"
+                class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black py-4 px-10 rounded-2xl shadow-xl transition-all hover:-translate-y-1 active:scale-95">
+                Return to Portal
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="p-8 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] space-y-2 mt-auto">
+        <p>Logbook System v2.1</p>
+        <p>Engineering Department Kiosk</p>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none items-end">
+    </div>
+    <template id="toastTemplate">
+        <div
+            class="toast-item flex items-center gap-4 bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in slide-in-from-right-8 duration-300 min-w-[320px]">
+            <div class="toast-icon-container p-2 rounded-xl bg-white/10">
+                <i data-lucide="check-circle" class="w-5 h-5 text-slate-200 toast-icon"></i>
+            </div>
+            <div class="flex-grow">
+                <p class="toast-message font-bold text-sm tracking-tight leading-tight"></p>
+            </div>
+        </div>
+    </template>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/employee.js"></script>
+</body>
+
+</html>

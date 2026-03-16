@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>/* Set theme class BEFORE any CSS loads to prevent flash */
+        (function () { try { var t = localStorage.getItem('logbook-theme') || 'light'; var isDark = t === 'dark'; document.documentElement.classList.toggle('dark', isDark); document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; } catch (e) { } })();
+    </script>
+    <title>Logbook System - Dashboard</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📖</text></svg>">
+    <script src="/vendor/tailwindcss.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'selector'
+        }
+    </script>
+    <script src="/js/lucide.js"></script>
+    <!-- PDF Generation Libraries -->
+    <script src="/js/jspdf.js"></script>
+    <script src="/js/jspdf-autotable.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-white font-sans min-h-screen flex">
+
+    <!-- Sidebar Navigation -->
+    <aside
+        class="sidebar bg-slate-900 h-screen fixed left-0 top-0 text-slate-400 flex flex-col border-r border-slate-800 shadow-2xl z-50">
+        <!-- Logo Area -->
+        <div class="p-6 border-b border-slate-800 mb-6">
+            <a href="dashboard.html" class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-xl text-white">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <span id="sidebarOfficeName" class="text-xl font-black text-white tracking-tight">Logbook<span
+                        class="text-blue-500">.</span></span>
+            </a>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="flex-grow px-4 space-y-2">
+            <div class="mb-4">
+                <a href="portal.html"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-black text-[11px] uppercase tracking-widest text-emerald-500 bg-emerald-500/5 border border-emerald-500/20 group">
+                    <i data-lucide="layout-grid" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                    Back to Portal
+                </a>
+            </div>
+
+            <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Main Menu</div>
+
+            <a href="dashboard.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600 text-white font-bold group shadow-lg shadow-blue-900/20">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                Dashboard
+            </a>
+
+            <a href="scan.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="scan" class="w-5 h-5 group-hover:text-blue-400 transition-colors"></i>
+                Scan ID
+            </a>
+
+            <a href="history.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="history" class="w-5 h-5 group-hover:text-emerald-400 transition-colors"></i>
+                    Log History
+                </div>
+            </a>
+
+            <div class="pt-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Management
+            </div>
+
+            <a href="students.html"
+                class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="users" class="w-5 h-5 group-hover:text-amber-400 transition-colors"></i>
+                    Student Records
+                </div>
+            </a>
+
+            <div id="facultyHubsSection"></div>
+
+            <a href="settings.html"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
+                <i data-lucide="settings" class="w-5 h-5 group-hover:text-violet-400 transition-colors"></i>
+                System Settings
+            </a>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="p-6 border-t border-slate-800">
+            <div class="bg-slate-800/50 rounded-2xl p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div
+                        class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                        S
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs font-bold text-white truncate user-email">Staff User</p>
+                        <p class="text-[10px] text-slate-500">Admin Access</p>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="text-slate-500 hover:text-red-400 focus:outline-none transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content flex-grow flex flex-col min-h-screen">
+
+        <!-- Top Navigation Bar -->
+        <header
+            class="h-20 bg-white border-b border-slate-200 dark:bg-slate-800 dark:border-slate-700 sticky top-0 z-40 px-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <button class="lg:hidden text-slate-400 hover:text-slate-600 focus:outline-none"
+                    onclick="document.querySelector('.sidebar').classList.toggle('active')">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4">
+
+
+                <a href="scan.html"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-lg shadow-blue-900/20 transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95 leading-none">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span class="text-sm">New Entry</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Scrollable Dashboard Body -->
+        <div class="p-8 space-y-8">
+
+            <!-- Page Heading & Context -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 dark:text-white">Dashboard Overlook</h1>
+                    <p class="text-slate-500 dark:text-slate-300 font-medium">Monitoring Engineering Department traffic
+                        & logs</p>
+                </div>
+                <div
+                    class="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <div class="bg-slate-50 p-2 rounded-xl text-slate-500">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                    </div>
+                    <div class="pr-3">
+                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-wider leading-none mb-1">
+                            Today's Date</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-200 leading-none"
+                            id="currentDateDisplay">Feb 27, 2026
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insight Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Stat: Total Daily Entries -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all group overflow-hidden relative">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative z-10 flex items-start justify-between">
+                        <div>
+                            <p
+                                class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-blue-600 transition-colors">
+                                Daily Traffic</p>
+                            <h3 class="text-4xl font-black text-slate-900 dark:text-white mb-2" id="todayCount">0</h3>
+                            <div
+                                class="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg w-fit">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                <span>+12% vs yest.</span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-blue-600 p-3 rounded-2xl text-white shadow-lg shadow-blue-900/20 group-hover:rotate-12 transition-transform">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat: Active Visitors (Real-time Insight) -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-emerald-100 transition-all group overflow-hidden relative">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative z-10 flex items-start justify-between">
+                        <div>
+                            <p
+                                class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-emerald-600 transition-colors">
+                                Active Now</p>
+                            <h3 class="text-4xl font-black text-slate-900 dark:text-white mb-2" id="activeCount">0</h3>
+                            <p class="text-[10px] font-bold text-slate-400 italic">Currently checked-in</p>
+                        </div>
+                        <div
+                            class="bg-emerald-600 p-3 rounded-2xl text-white shadow-lg shadow-emerald-900/20 group-hover:rotate-12 transition-transform">
+                            <i data-lucide="user-check" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat: Pending Verification (Real-time Insight) -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-amber-100 transition-all group overflow-hidden relative border-l-4 border-l-amber-500">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-amber-50 dark:bg-amber-900/20 rounded-full group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative z-10 flex items-start justify-between">
+                        <div>
+                            <p
+                                class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-amber-600 transition-colors">
+                                Students Waiting</p>
+                            <h3 class="text-4xl font-black text-slate-900 dark:text-white mb-2" id="pendingCount">0</h3>
+                            <p class="text-[10px] font-bold text-slate-400 italic">Awaiting verification</p>
+                        </div>
+                        <div
+                            class="bg-amber-500 p-3 rounded-2xl text-white shadow-lg shadow-amber-900/20 group-hover:rotate-12 transition-transform">
+                            <i data-lucide="clock" class="w-6 h-6 animate-pulse"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stat: Month Summary -->
+                <div
+                    class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all group overflow-hidden relative border-l-4 border-l-indigo-600">
+                    <div
+                        class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full group-hover:scale-150 transition-transform duration-500">
+                    </div>
+                    <div class="relative z-10 flex items-start justify-between">
+                        <div>
+                            <p
+                                class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 group-hover:text-indigo-600 transition-colors">
+                                Monthly Reach</p>
+                            <h3 class="text-4xl font-black text-slate-900 dark:text-white mb-2" id="monthCount">0</h3>
+                            <p class="text-[10px] font-bold text-slate-400">Total volume this month</p>
+                        </div>
+                        <div
+                            class="bg-indigo-600 p-3 rounded-2xl text-white shadow-lg shadow-indigo-900/20 group-hover:rotate-12 transition-transform">
+                            <i data-lucide="archive" class="w-6 h-6"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Data View Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                <!-- Recent Logs Table (Span 2) -->
+                <div
+                    class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+                    <div
+                        class="px-8 py-6 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-4 bg-white dark:bg-slate-800 sticky top-0 z-10">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-slate-50 p-2 rounded-xl text-slate-600">
+                                <i data-lucide="list" class="w-5 h-5"></i>
+                            </div>
+                            <h5 class="text-lg font-black text-slate-800 dark:text-white tracking-tight">Recent Logs
+                            </h5>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="refreshBtn"
+                                class="bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300 dark:border-slate-600 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-black transition-all border border-slate-100 flex items-center gap-2">
+                                <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i> Refresh
+                            </button>
+                            <button id="exportBtn"
+                                class="bg-slate-50 hover:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-300 dark:border-slate-600 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-black transition-all border border-slate-100 flex items-center gap-2">
+                                <i data-lucide="download" class="w-3.5 h-3.5"></i> Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search and filters -->
+                    <div
+                        class="p-6 bg-slate-50/50 dark:bg-slate-700/50 border-b border-slate-100 dark:border-slate-700">
+                        <div class="flex flex-wrap gap-4">
+                            <div class="relative min-w-[300px] flex-grow">
+                                <div
+                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </div>
+                                <input type="text" id="searchInput" placeholder="Search name or NFC chip..."
+                                    class="block w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 dark:text-slate-200 dark:placeholder-slate-400 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium">
+                            </div>
+                            <select id="dateFilter"
+                                class="bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Time</option>
+                                <option value="today">Today</option>
+                                <option value="week">Past 7 Days</option>
+                                <option value="month">Past 30 Days</option>
+                            </select>
+                            <select id="activityFilter"
+                                class="bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Activities</option>
+                                <option value="Enrollment Concern">Enrollment Concern</option>
+                                <option value="Document Request">Document Request</option>
+                                <option value="Financial Concern">Financial Concern</option>
+                                <option value="Inquiry">Inquiry</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Table container -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead
+                                class="bg-slate-50/80 dark:bg-slate-700/80 text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 border-b border-slate-100 dark:border-slate-600">
+                                <tr>
+                                    <th class="px-8 py-4">Visitor Details</th>
+                                    <th class="px-6 py-4 text-center">Year Level</th>
+                                    <th class="px-6 py-4">Activity Info</th>
+                                    <th class="px-6 py-4 text-center">Duration</th>
+                                    <th class="px-6 py-4 text-center">Status</th>
+                                    <th class="px-8 py-4 text-right">Verification</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entriesTableBody" class="divide-y divide-slate-50 dark:divide-slate-700">
+                                <!-- Populated via JS -->
+                                <tr>
+                                    <td colspan="5" class="px-8 py-20 text-center">
+                                        <div class="flex flex-col items-center justify-center animate-pulse">
+                                            <div class="bg-slate-100 w-12 h-12 rounded-full mb-4"></div>
+                                            <div class="h-4 bg-slate-100 rounded w-32 mb-2"></div>
+                                            <div class="h-3 bg-slate-50 rounded w-48"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div
+                        class="p-6 border-t border-slate-50 dark:border-slate-700 flex items-center justify-center mt-auto">
+                        <ul id="pagination" class="flex items-center gap-1"></ul>
+                    </div>
+                </div>
+
+                <!-- Insights Sidebar (Span 1) -->
+                <div class="space-y-8">
+
+                    <!-- Activity Distribution Insight -->
+                    <div
+                        class="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div
+                            class="p-5 border-b border-slate-100 dark:border-slate-600 flex items-center justify-between bg-slate-50 dark:bg-slate-700">
+                            <h5
+                                class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest pl-1">
+                                Activity Share
+                            </h5>
+                            <select id="insightTimeFilter"
+                                class="bg-white dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-widest rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-600 cursor-pointer">
+                                <option value="all">Overall</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                        <div class="p-6 space-y-6" id="activityDistribution">
+                            <!-- Populated via JS -->
+                            <div
+                                class="flex flex-col items-center justify-center text-slate-400 py-10 font-medium italic text-xs">
+                                <p>Generating insights...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Info / Help Card -->
+                    <div
+                        class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white relative overflow-hidden group shadow-xl">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="bg-white/10 p-3 rounded-2xl w-fit mb-6 backdrop-blur-md">
+                                <i data-lucide="info" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <h4 class="text-xl font-black mb-3 leading-tight">Need a full report?</h4>
+                            <p class="text-slate-400 text-sm mb-4 leading-relaxed">System administrators can generate
+                                custom PDF reports for departmental reviews.</p>
+
+                            <div class="relative mb-4">
+                                <select id="reportTimeFilter"
+                                    class="w-full bg-slate-800/80 border border-slate-700 text-slate-300 text-sm font-bold rounded-xl pl-4 pr-10 py-3 outline-none focus:ring-2 focus:ring-blue-500 transition-all hover:bg-slate-700 cursor-pointer appearance-none">
+                                    <option value="today">Daily Report (Today)</option>
+                                    <option value="week">Weekly Report (Last 7 Days)</option>
+                                    <option value="month">Monthly Report (Last 30 Days)</option>
+                                    <option value="all">Complete Log History (All Time)</option>
+                                </select>
+                                <div
+                                    class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+
+                            <button id="generateReportBtn"
+                                class="w-full bg-blue-600 text-white font-black py-3 rounded-xl hover:bg-blue-500 shadow-lg shadow-blue-900/50 transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                Generate Report
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Entry Details Modal (Redesigned with Sidebar Look) -->
+    <div id="entryModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+        <div
+            class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden border border-slate-100 dark:border-slate-700 transition-all">
+            <div class="p-8 pb-0 flex justify-between items-start">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-3xl text-blue-600 dark:text-blue-400 shadow-inner">
+                        <i data-lucide="file-text" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Entry Details</h5>
+                        <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Transaction Records</p>
+                    </div>
+                </div>
+                <button type="button"
+                    class="bg-slate-50 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                    onclick="document.getElementById('entryModal').classList.add('hidden'); document.getElementById('entryModal').classList.remove('flex')">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div id="entryDetails" class="p-8">
+                <!-- Data populated via JS -->
+            </div>
+
+            <div class="p-8 pt-0 flex justify-end gap-3">
+                <button type="button" id="deleteEntryBtn"
+                    class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white font-black px-6 py-3 rounded-2xl transition-all flex items-center gap-2 mr-auto border border-red-100">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Delete Log
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastContainer" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none items-end">
+        <!-- Toasts will be injected here -->
+    </div>
+
+    <template id="toastTemplate">
+        <div
+            class="toast-item flex items-center gap-4 bg-slate-900/90 backdrop-blur-md text-white px-6 py-4 rounded-2xl shadow-2xl border border-white/10 animate-in fade-in slide-in-from-right-8 duration-300 min-w-[320px]">
+            <div class="toast-icon-container p-2 rounded-xl bg-white/10">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 toast-icon"></i>
+            </div>
+            <div class="flex-grow">
+                <p class="toast-message font-bold text-sm tracking-tight leading-tight"></p>
+            </div>
+        </div>
+    </template>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js": "/vendor/firebase/firebase-app.js",
+                "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js": "/vendor/firebase/firebase-auth.js"
+            }
+        }
+    </script>
+    <script type="module" src="js/firebase.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/logs.js"></script>
+    <script src="js/navigation.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+
+            // Current date update
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            const dateDisplay = document.getElementById('currentDateDisplay');
+            if (dateDisplay) {
+                dateDisplay.textContent = new Date().toLocaleDateString('en-US', options);
+            }
+
+            // MutationObserver for re-initializing Lucide icons in table
+            const tableBody = document.getElementById('entriesTableBody');
+            if (tableBody) {
+                const observer = new MutationObserver(() => lucide.createIcons());
+                observer.observe(tableBody, { childList: true });
+            }
+        });
+    </script>
+</body>
+
+</html>
