@@ -84,6 +84,7 @@ class LogsManager {
         const searchInput = document.getElementById('searchInput');
         const activityFilter = document.getElementById('activityFilter');
         const dateFilter = document.getElementById('dateFilter');
+        const visitorTypeFilter = document.getElementById('visitorTypeFilter');
         const insightTimeFilter = document.getElementById('insightTimeFilter');
         const exportBtn = document.getElementById('exportBtn');
         const refreshBtn = document.getElementById('refreshBtn');
@@ -101,6 +102,10 @@ class LogsManager {
 
         if (dateFilter) {
             dateFilter.addEventListener('change', () => this.filterEntries());
+        }
+
+        if (visitorTypeFilter) {
+            visitorTypeFilter.addEventListener('change', () => this.filterEntries());
         }
 
         if (insightTimeFilter) {
@@ -204,10 +209,12 @@ class LogsManager {
         const searchInput = document.getElementById('searchInput');
         const activityFilter = document.getElementById('activityFilter');
         const dateFilter = document.getElementById('dateFilter');
+        const visitorTypeFilter = document.getElementById('visitorTypeFilter');
 
         const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
         const activityValue = activityFilter ? activityFilter.value : '';
         const dateValue = dateFilter ? dateFilter.value : '';
+        const visitorTypeValue = visitorTypeFilter ? visitorTypeFilter.value : '';
 
         // Predefined activity values (must match what's in the scan form dropdown)
         let predefinedActivities = ['Enrollment Concern', 'Document Request', 'Financial Concern', 'Inquiry'];
@@ -263,7 +270,26 @@ class LogsManager {
             }
 
 
-            return matchesSearch && matchesActivity && matchesDate;
+            // Visitor type filter
+            let matchesVisitorType = true;
+            if (visitorTypeValue) {
+                const sn = (entry.studentNumber || '').toUpperCase();
+                const act = (entry.activity || '');
+                const isParent = sn === 'PARENT_VISIT' || act.startsWith('[Parent]');
+                const isEmployee = sn === 'EMPLOYEE_LOG' || act.startsWith('[Employee]');
+                const isVisitor = sn === 'VISITOR_VISIT' || act.startsWith('[Visitor]');
+                const isStudent = !isParent && !isEmployee && !isVisitor;
+
+                switch (visitorTypeValue) {
+                    case 'parent':   matchesVisitorType = isParent;   break;
+                    case 'employee': matchesVisitorType = isEmployee; break;
+                    case 'visitor':  matchesVisitorType = isVisitor;  break;
+                    case 'student':  matchesVisitorType = isStudent;  break;
+                    default:         matchesVisitorType = true;
+                }
+            }
+
+            return matchesSearch && matchesActivity && matchesDate && matchesVisitorType;
         });
 
         this.currentPage = 1;
@@ -328,7 +354,9 @@ class LogsManager {
                     </div>
                 </td>
                 <td class="px-6 py-5 font-bold text-slate-600 dark:text-slate-400 text-xs text-center">
-                    ${entry.yearLevel || entry['Year Level'] || '---'}
+                    ${(entry.studentNumber === 'PARENT_VISIT' || entry.studentNumber === 'EMPLOYEE_LOG' || entry.studentNumber === 'VISITOR_VISIT' || (entry.activity && (entry.activity.startsWith('[Parent]') || entry.activity.startsWith('[Employee]') || entry.activity.startsWith('[Visitor]')))) 
+                        ? '---' 
+                        : (entry.yearLevel || entry['Year Level'] || '---')}
                 </td>
                 <td class="px-6 py-5">
                     <div class="space-y-1">
@@ -654,14 +682,20 @@ class LogsManager {
                         <p class="text-sm text-slate-500 mb-1">Full Name</p>
                         <p class="font-bold text-slate-900 dark:text-white">${entry.studentName}</p>
                     </div>
-                    <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
-                        <p class="text-sm text-slate-500 mb-1">Student ID Number</p>
-                        <p class="font-bold text-slate-900 dark:text-white">${entry.studentId || 'N/A'}</p>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
-                        <p class="text-sm text-slate-500 mb-1">NFC Chip Number</p>
-                        <p class="font-mono font-bold text-slate-900 dark:text-white">${entry.studentNumber}</p>
-                    </div>
+                    ${!(entry.studentNumber === 'PARENT_VISIT' || entry.studentNumber === 'EMPLOYEE_LOG' || entry.studentNumber === 'VISITOR_VISIT' || (entry.activity && (entry.activity.startsWith('[Parent]') || entry.activity.startsWith('[Employee]') || entry.activity.startsWith('[Visitor]')))) 
+                        ? `<div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
+                                <p class="text-sm text-slate-500 mb-1">Student ID Number</p>
+                                <p class="font-bold text-slate-900 dark:text-white">${entry.studentId || 'N/A'}</p>
+                           </div>`
+                        : ''
+                    }
+                    ${!(entry.studentNumber === 'PARENT_VISIT' || entry.studentNumber === 'EMPLOYEE_LOG' || entry.studentNumber === 'VISITOR_VISIT' || (entry.activity && (entry.activity.startsWith('[Parent]') || entry.activity.startsWith('[Employee]') || entry.activity.startsWith('[Visitor]')))) 
+                        ? `<div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
+                                <p class="text-sm text-slate-500 mb-1">NFC Chip Number</p>
+                                <p class="font-mono font-bold text-slate-900 dark:text-white">${entry.studentNumber}</p>
+                           </div>`
+                        : ''
+                    }
                 </div>
                 <div class="space-y-4">
                     <h6 class="text-xs font-black uppercase tracking-widest text-slate-400">Visit Details</h6>

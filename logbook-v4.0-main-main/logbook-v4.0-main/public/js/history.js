@@ -96,6 +96,7 @@ class HistoryManager {
             const activityVal = document.getElementById('activityFilter').value;
             const searchVal = document.getElementById('historySearch').value.toLowerCase();
             const yearLevelVal = document.getElementById('yearLevelFilter').value;
+            const visitorTypeVal = document.getElementById('visitorTypeFilter').value;
 
             // Base query: Fetch logs from the local backend database
             const response = await fetch(`/api/logs?officeId=${this.officeId}`);
@@ -137,13 +138,31 @@ class HistoryManager {
                 // Year Level Filtering
                 const matchesYear = !yearLevelVal || entry.yearLevel === yearLevelVal || entry['Year Level'] === yearLevelVal;
 
+                // Visitor Type Filtering
+                let matchesVisitorType = true;
+                if (visitorTypeVal) {
+                    const sn = (entry.studentNumber || '').toUpperCase();
+                    const act = (entry.activity || '');
+                    const isParent = sn === 'PARENT_VISIT' || act.startsWith('[Parent]');
+                    const isEmployee = sn === 'EMPLOYEE_LOG' || act.startsWith('[Employee]');
+                    const isVisitor = sn === 'VISITOR_VISIT' || act.startsWith('[Visitor]');
+                    const isStudent = !isParent && !isEmployee && !isVisitor;
+
+                    switch (visitorTypeVal) {
+                        case 'parent':   matchesVisitorType = isParent;   break;
+                        case 'employee': matchesVisitorType = isEmployee; break;
+                        case 'visitor':  matchesVisitorType = isVisitor;  break;
+                        case 'student':  matchesVisitorType = isStudent;  break;
+                    }
+                }
+
                 // Search filtering (Name, ID, Number)
                 const matchesSearch = !searchVal ||
                     (entry.studentName && entry.studentName.toLowerCase().includes(searchVal)) ||
                     (entry.studentNumber && entry.studentNumber.toLowerCase().includes(searchVal)) ||
                     (entry.studentId && entry.studentId.toLowerCase().includes(searchVal));
 
-                return matchesDate && matchesActivity && matchesYear && matchesSearch;
+                return matchesDate && matchesActivity && matchesYear && matchesVisitorType && matchesSearch;
             });
 
             this.filteredEntries = [...this.allEntries];
@@ -207,7 +226,9 @@ class HistoryManager {
                     </div>
                 </td>
                 <td class="px-6 py-6 font-bold text-slate-600 text-xs text-center">
-                    ${entry.yearLevel || entry['Year Level'] || 'N/A'}
+                    ${(entry.studentNumber === 'PARENT_VISIT' || entry.studentNumber === 'EMPLOYEE_LOG' || entry.studentNumber === 'VISITOR_VISIT' || (entry.activity && (entry.activity.startsWith('[Parent]') || entry.activity.startsWith('[Employee]') || entry.activity.startsWith('[Visitor]')))) 
+                        ? '---' 
+                        : (entry.yearLevel || entry['Year Level'] || '---')}
                 </td>
                 <td class="px-6 py-6">
                     <div class="space-y-1">
