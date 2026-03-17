@@ -100,6 +100,29 @@ class StudentKioskManager {
         document.getElementById('switchStudentBtn')?.addEventListener('click', () => this.resetUI());
         document.getElementById('proceedToTransactionBtn')?.addEventListener('click', () => this.showActivitySelection());
 
+        // Landing Selection Actions
+        document.getElementById('viewHistoryLandingBtn')?.addEventListener('click', () => {
+            if (this.currentStudent) this.showStudentHistory(this.currentStudent);
+        });
+        document.getElementById('startTransactionLandingBtn')?.addEventListener('click', () => {
+            if (this.currentStudent) this.showActivitySelection();
+        });
+        document.getElementById('cancelLandingBtn')?.addEventListener('click', () => this.resetUI());
+        document.getElementById('backFromHistoryBtn')?.addEventListener('click', () => {
+            if (this.currentStudent) this.showLandingSelection(this.currentStudent);
+        });
+
+        // Close proof modal
+        const closeBtn = document.getElementById('closeProofModal');
+        const closeBtn2 = document.getElementById('closeProofModalBtn');
+        const modal = document.getElementById('proofViewerModal');
+        [closeBtn, closeBtn2].forEach(btn => {
+            btn?.addEventListener('click', () => modal?.classList.add('hidden'));
+        });
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+
         document.getElementById('submitCustomActivityBtn')?.addEventListener('click', () => {
             const input = document.getElementById('customActivityInput');
             const customVal = input?.value.trim();
@@ -180,7 +203,7 @@ class StudentKioskManager {
             });
         });
 
-        document.getElementById('submitManualBtn')?.addEventListener('click', () => {
+        document.getElementById('submitManualBtn')?.addEventListener('click', async () => {
             const name = document.getElementById('manualName')?.value.trim();
             const id = document.getElementById('manualId')?.value.trim();
             const program = document.getElementById('manualProgram')?.value.trim();
@@ -191,7 +214,30 @@ class StudentKioskManager {
                 return;
             }
 
-            // Create a "virtual" student object from manual input
+            // Attempt to look up the student ID to link with registered info
+            try {
+                const response = await fetch(`/api/students/${id}?officeId=${this.officeId}`);
+                if (response.ok) {
+                    const student = await response.json();
+                    this.currentStudent = student;
+                    
+                    // Show a welcoming toast if found
+                    this.showToast(`Using registered profile for ${student.name}`);
+
+                    // Use registered data but allow the session to proceed
+                    // If they have active logs, we follow the scan logic
+                    if (student.activeLogs && student.activeLogs.length > 0) {
+                        this.showTimeOutPrompt(student);
+                    } else {
+                        this.showLandingSelection(student);
+                    }
+                    return;
+                }
+            } catch (error) {
+                console.warn('Manual lookup check failed, proceeding with guest details:', error);
+            }
+
+            // Create a "virtual" student object from manual input (Fallback/Guest)
             const virtualStudent = {
                 id: id, // Internal reference
                 name: name,
@@ -203,7 +249,7 @@ class StudentKioskManager {
             };
 
             this.currentStudent = virtualStudent;
-            this.showActivitySelection(); // Proceed directly to transaction
+            this.showLandingSelection(virtualStudent); // Proceed to landing selection
         });
 
         // Add Enter key support for manual fields
@@ -236,7 +282,7 @@ class StudentKioskManager {
             if (student.activeLogs && student.activeLogs.length > 0) {
                 this.showTimeOutPrompt(student);
             } else {
-                this.showActivitySelection(); // Proceed directly to transaction
+                this.showLandingSelection(student); // Show landing selection
             }
         } catch (error) {
             console.error('Scan handling error:', error);
@@ -259,19 +305,30 @@ class StudentKioskManager {
         } catch { }
     }
 
+    hideAllScreens() {
+        const screens = [
+            'scanPrompt', 'manualEntryForm', 'landingSelection',
+            'timeOutPrompt', 'activitySelection', 'otherActivitySection',
+            'detailsSelection', 'facultySelection', 'logContent'
+        ];
+        screens.forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
+        });
+    }
+
     resetUI() {
         this.currentStudent = null;
         this.selectedActivity = null;
         this.selectedDetails = null;
         this.selectedFaculty = null;
+        this.barcodeBuffer = '';
 
-        // Hide everything
-        ['timeOutPrompt', 'activitySelection', 'otherActivitySection', 'detailsSelection', 'facultySelection', 'logContent'].forEach(id => {
-            document.getElementById(id)?.classList.add('hidden');
-        });
-
-        // Show scan prompt
+        this.hideAllScreens();
+        
+        // Show scan prompt only
         document.getElementById('scanPrompt')?.classList.remove('hidden');
+        document.getElementById('manualEntryInitial')?.classList.remove('hidden');
+        document.getElementById('manualEntryForm')?.classList.add('hidden');
 
         // Reset inputs
         const customInput = document.getElementById('customActivityInput');
@@ -290,9 +347,21 @@ class StudentKioskManager {
         this.setupLucide();
     }
 
+    showLandingSelection(student) {
+        this.hideAllScreens();
+
+        const landing = document.getElementById('landingSelection');
+        if (!landing) return;
+
+        landing.classList.remove('hidden');
+        const nameEl = document.getElementById('landingStudentName');
+        if (nameEl) nameEl.textContent = student.name.split(' ')[0];
+
+        this.setupLucide();
+    }
+
     showTimeOutPrompt(student) {
-        document.getElementById('scanPrompt')?.classList.add('hidden');
-        document.getElementById('logContent')?.classList.add('hidden');
+        this.hideAllScreens();
 
         const prompt = document.getElementById('timeOutPrompt');
         if (!prompt) return;
@@ -337,10 +406,7 @@ class StudentKioskManager {
     }
 
     showStudentHistory(student) {
-        document.getElementById('scanPrompt')?.classList.add('hidden');
-        document.getElementById('timeOutPrompt')?.classList.add('hidden');
-        document.getElementById('activitySelection')?.classList.add('hidden');
-        document.getElementById('facultySelection')?.classList.add('hidden');
+        this.hideAllScreens();
 
         const logContent = document.getElementById('logContent');
         if (!logContent) return;
@@ -377,10 +443,21 @@ class StudentKioskManager {
                     const statusClass = log.timeOut ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700';
                     const statusText = log.timeOut ? 'Completed' : 'Active';
 
+                    let proofAction = '';
+                    if (log.proofImage) {
+                        proofAction = `
+                            <button onclick="window.kioskManager.viewProof('${log.proofImage}')" 
+                                class="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 px-3 py-1.5 rounded-full transition-all border border-violet-100 dark:border-violet-900/50">
+                                <i data-lucide="image" class="w-3 h-3"></i> View Proof
+                            </button>
+                        `;
+                    }
+
                     row.innerHTML = `
                         <td class="px-8 py-5 font-bold text-slate-500 dark:text-slate-400 text-xs">${date}</td>
                         <td class="px-6 py-5">
                             <span class="block font-black text-slate-800 dark:text-white text-sm leading-tight">${log.activity || '<span class="text-slate-400 font-normal italic">—</span>'}</span>
+                            ${proofAction}
                         </td>
                         <td class="px-6 py-5 text-center">
                             <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${statusClass}">${statusText}</span>
@@ -396,9 +473,7 @@ class StudentKioskManager {
     }
 
     showActivitySelection() {
-        ['scanPrompt', 'timeOutPrompt', 'logContent', 'detailsSelection', 'facultySelection'].forEach(id => {
-            document.getElementById(id)?.classList.add('hidden');
-        });
+        this.hideAllScreens();
 
         const activitySection = document.getElementById('activitySelection');
         if (!activitySection) return;
@@ -451,9 +526,7 @@ class StudentKioskManager {
     }
 
     showDetailsPrompt() {
-        ['activitySelection', 'otherActivitySection', 'facultySelection'].forEach(id => {
-            document.getElementById(id)?.classList.add('hidden');
-        });
+        this.hideAllScreens();
 
         const detailsSection = document.getElementById('detailsSelection');
         if (!detailsSection) return;
@@ -507,9 +580,7 @@ class StudentKioskManager {
     }
 
     showFacultySelection() {
-        ['activitySelection', 'otherActivitySection', 'detailsSelection'].forEach(id => {
-            document.getElementById(id)?.classList.add('hidden');
-        });
+        this.hideAllScreens();
 
         const facultySection = document.getElementById('facultySelection');
         if (!facultySection) return;
@@ -609,6 +680,16 @@ class StudentKioskManager {
             }
         } catch (e) {
             this.showToast('Failed to log visit. Please see staff.', 'error');
+        }
+    }
+
+    viewProof(url) {
+        const modal = document.getElementById('proofViewerModal');
+        const img = document.getElementById('proofImageElement');
+        if (modal && img) {
+            img.src = url;
+            modal.classList.remove('hidden');
+            this.setupLucide();
         }
     }
 }

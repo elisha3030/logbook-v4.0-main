@@ -14,7 +14,8 @@ console.log('6. sqlite loaded');
 const sqlite3 = require('sqlite3');
 console.log('7. sqlite3 loaded');
 const crypto = require('crypto');
-console.log('8. crypto loaded');
+const multer = require('multer');
+const fs = require('fs');
 const session = require('express-session');
 const SQLiteStore = require('connect-sqlite3')(session);
 console.log('9. session modules loaded');
@@ -22,7 +23,27 @@ console.log('9. session modules loaded');
 const app = express();
 console.log('8. express app created');
 const PORT = process.env.PORT || 3000;
-console.log('9. PORT set to', PORT);
+
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = path.join(__dirname, 'public', 'uploads', 'proofs');
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'proof-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // Initialize Firebase Admin
 let db = null;
@@ -150,6 +171,11 @@ async function initializeLocalDb() {
     // Add serviceStartTime column if it doesn't exist
     try {
         await localDb.exec('ALTER TABLE logs ADD COLUMN serviceStartTime TEXT');
+    } catch (e) { /* column already exists */ }
+
+    // Add proofImage column if it doesn't exist
+    try {
+        await localDb.exec('ALTER TABLE logs ADD COLUMN proofImage TEXT');
     } catch (e) { /* column already exists */ }
 
     // Add synced column to students if it doesn't exist
@@ -344,8 +370,20 @@ app.get('/api/logs', async (req, res) => {
         let params = [officeId];
 
         if (studentNumber) {
-            query += ' AND studentNumber = ?';
-            params.push(studentNumber);
+            // Unify history: Check both barcode and studentId
+            // First, try to find the student to get all identifiers
+            const student = await localDb.get(
+                'SELECT barcode, studentId FROM students WHERE barcode = ? OR studentId = ?',
+                [studentNumber, studentNumber]
+            );
+
+            if (student) {
+                query += ' AND (studentNumber = ? OR studentNumber = ? OR studentId = ? OR studentId = ?)';
+                params.push(student.barcode, student.studentId, student.barcode, student.studentId);
+            } else {
+                query += ' AND (studentNumber = ? OR studentId = ?)';
+                params.push(studentNumber, studentNumber);
+            }
         }
 
         query += ' ORDER BY timeIn DESC LIMIT ?';
@@ -459,7 +497,7 @@ app.get('/api/students/:barcode', async (req, res) => {
 
         if (localStudent) {
             const studentData = {
-                id: barcode,
+                id: localStudent.barcode, // Always use the official barcode from the record
                 ...localStudent,
                 Course: localStudent.course,
                 'Year Level': localStudent.yearLevel
@@ -687,6 +725,29 @@ app.patch('/api/logs/:id/status', async (req, res) => {
     } catch (error) {
         console.error('Error updating log status locally:', error);
         res.status(500).json({ error: 'Failed to update log status' });
+    }
+});
+
+// Upload proof for a log
+app.post('/api/logs/:id/upload-proof', upload.single('proof'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!req.file) {
+            return res.status(400).json({ error: 'No image file provided' });
+        }
+
+        const proofUrl = `/uploads/proofs/${req.file.filename}`;
+        
+        await localDb.run(
+            'UPDATE logs SET proofImage = ?, synced = 0 WHERE id = ?',
+            [proofUrl, id]
+        );
+
+        res.json({ success: true, proofUrl });
+        syncToCloud();
+    } catch (error) {
+        console.error('Error uploading proof:', error);
+        res.status(500).json({ error: 'Failed to upload proof' });
     }
 });
 

@@ -131,6 +131,44 @@
                 </div>
             </div>
         </div>
+    </div>
+
+        <!-- Action Selection (Hidden until student identified) -->
+        <div id="landingSelection" class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="text-center space-y-4">
+                <h2 class="text-5xl font-black tracking-tight text-slate-900 dark:text-white">Welcome, <span id="landingStudentName" class="text-blue-600">Student</span>!</h2>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">What would you like to do today?</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-2xl px-4">
+                <button id="viewHistoryLandingBtn"
+                    class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-blue-900/5 hover:shadow-blue-900/10 hover:-translate-y-1 transition-all active:scale-95 flex flex-col items-center gap-4 text-center">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i data-lucide="history" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl font-black text-slate-900 dark:text-white">View History</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">See your past visits</p>
+                    </div>
+                </button>
+
+                <button id="startTransactionLandingBtn"
+                    class="group bg-blue-600 p-8 rounded-[2.5rem] shadow-xl shadow-blue-500/20 hover:bg-blue-700 hover:-translate-y-1 transition-all active:scale-95 flex flex-col items-center gap-4 text-center">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <p class="text-xl font-black text-white">New Transaction</p>
+                        <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest">Start a new visit</p>
+                    </div>
+                </button>
+            </div>
+
+            <button id="cancelLandingBtn"
+                class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
+                Cancel & Go Back
+            </button>
+        </div>
 
         <!-- Time-Out Prompt (Hidden until active session detected) -->
         <div id="timeOutPrompt"
@@ -328,11 +366,16 @@
                                 <i data-lucide="arrow-right-circle" class="w-3.5 h-3.5"></i>
                                 Proceed to Transaction
                             </button>
-                            <button id="switchStudentBtn"
-                                class="bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2">
-                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                                Switch User
-                            </button>
+                             <button id="switchStudentBtn"
+                                 class="bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-xl border border-red-100 dark:border-red-900/20 text-red-600 dark:text-red-400 text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-all flex items-center gap-2">
+                                 <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                 Switch User
+                             </button>
+                             <button id="backFromHistoryBtn"
+                                 class="bg-slate-100 dark:bg-slate-700 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2">
+                                 <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                                 Back to Menu
+                             </button>
                         </div>
                     </div>
                 </div>
@@ -390,6 +433,24 @@
 
     <!-- Toast Notification -->
     <div id="toastContainer" class="fixed bottom-8 right-8 z-[100] flex flex-col gap-3 pointer-events-none items-end">
+    </div>
+
+    <!-- Proof Viewer Modal -->
+    <div id="proofViewerModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-300">
+        <div class="relative bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-300">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                <h3 class="text-xl font-black text-slate-800 dark:text-white tracking-tight">Signed Document Proof</h3>
+                <button id="closeProofModal" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-red-500 transition-all">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            <div class="p-8 overflow-auto flex justify-center bg-slate-50 dark:bg-slate-900/50">
+                <img id="proofImageElement" src="" alt="Proof" class="max-w-full rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+            </div>
+            <div class="p-6 border-t border-slate-100 dark:border-slate-700 flex justify-end bg-white dark:bg-slate-800">
+                <button id="closeProofModalBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold px-8 py-3 rounded-2xl hover:-translate-y-1 transition-all">Close</button>
+            </div>
+        </div>
     </div>
     <template id="toastTemplate">
         <div

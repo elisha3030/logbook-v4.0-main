@@ -236,6 +236,22 @@ async function renderQueue() {
             actionBtn = `<span class="text-[11px] text-slate-400 italic block text-right">Completed</span>`;
         }
 
+        // Proof Action Button
+        let proofBtn = '';
+        if (isInService || isCompleted) {
+            if (log.proofImage) {
+                proofBtn = `<button onclick="window.open('${log.proofImage}', '_blank')" 
+                        class="p-2 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all shadow-sm" title="View Proof">
+                        <i data-lucide="image" class="w-4 h-4"></i>
+                    </button>`;
+            } else {
+                proofBtn = `<button onclick="handleProofUpload('${escape(log.id)}')" 
+                        class="p-2 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all" title="Upload Proof">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                    </button>`;
+            }
+        }
+
         return `
             <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ${isCompleted ? 'opacity-60' : ''}">
                 <td class="px-8 py-4">
@@ -262,7 +278,8 @@ async function renderQueue() {
                     ${statusBadge}
                 </td>
                 <td class="px-8 py-4">
-                    <div class="flex justify-end">
+                    <div class="flex items-center justify-end gap-2">
+                        ${proofBtn}
                         ${actionBtn}
                     </div>
                 </td>
@@ -442,6 +459,56 @@ window.markComplete = async function (logId) {
         if (btn) { btn.disabled = false; btn.innerHTML = `<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Mark Done`; lucide.createIcons(); }
     }
 };
+
+// ----------------------------------------------------------------
+// Proof Upload Handling
+// ----------------------------------------------------------------
+let currentUploadLogId = null;
+
+window.handleProofUpload = function(logId) {
+    currentUploadLogId = logId;
+    const input = document.getElementById('proofUploadInput');
+    if (input) {
+        input.value = ''; // Reset
+        input.click();
+    }
+};
+
+// Global listener for the file input (added in init)
+async function handleFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file || !currentUploadLogId) return;
+
+    if (!file.type.startsWith('image/')) {
+        showToast('Please select an image file', 'error');
+        return;
+    }
+
+    // Optimization: we could show a loading state on the button here
+    // but for simplicity we'll just show the toast
+    showToast('Uploading proof...', 'success');
+
+    const formData = new FormData();
+    formData.append('proof', file);
+
+    try {
+        const res = await fetch(`/api/logs/${currentUploadLogId}/upload-proof`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!res.ok) throw new Error('Upload failed');
+        
+        const data = await res.json();
+        showToast('Proof uploaded successfully!');
+        renderQueue(); // Refresh to show the image button
+    } catch (e) {
+        console.error('Upload error:', e);
+        showToast('Failed to upload proof', 'error');
+    } finally {
+        currentUploadLogId = null;
+    }
+}
 
 // ----------------------------------------------------------------
 // Generate PDF Summary Report
@@ -635,6 +702,9 @@ function init() {
     document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
         generatePDF();
     });
+
+    // Proof upload listener
+    document.getElementById('proofUploadInput')?.addEventListener('change', handleFileSelected);
 }
 
 if (document.readyState === 'loading') {
