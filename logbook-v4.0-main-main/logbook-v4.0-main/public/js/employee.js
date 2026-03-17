@@ -174,7 +174,7 @@ class EmployeeKioskManager {
             } else {
                 grid.innerHTML = this.activeEmployees.map(e => `
                     <button onclick="window.kioskManager.checkoutEmployee('${e.id}', '${e.studentName.replace(/'/g, "\\'")}')"
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-900 dark:hover:border-white hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center">
+                        class="group bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-900 dark:hover:border-white hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center w-56">
                         <div class="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900 transition-all">
                             <i data-lucide="user" class="w-8 h-8"></i>
                         </div>
@@ -182,7 +182,7 @@ class EmployeeKioskManager {
                             <p class="text-lg font-black text-slate-900 dark:text-white leading-tight">${e.studentName}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${e.activity}</p>
                         </div>
-                        <div class="mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-200 group-hover:text-white dark:group-hover:text-slate-900 transition-all">
+                        <div class="mt-2 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-200 group-hover:text-white dark:group-hover:text-slate-900 transition-all">
                             Log Out
                         </div>
                     </button>

@@ -22,7 +22,7 @@ class VisitorKioskManager {
         await this.loadSettings();
         this.setupEventListeners();
         this.setupLucide();
-        this.showStep('modeSelectionStep');
+        this.showStep('visitorInfoStep');
     }
 
     async loadSettings() {
@@ -68,16 +68,6 @@ class VisitorKioskManager {
     }
 
     setupEventListeners() {
-        // Mode Selection
-        document.getElementById('modeArrivalBtn')?.addEventListener('click', () => {
-            this.showStep('visitorInfoStep');
-        });
-
-        document.getElementById('modeDepartureBtn')?.addEventListener('click', () => {
-            this.showStep('checkoutStep');
-            this.fetchActiveVisitors();
-        });
-
         // Arrival Step 1 -> Step 2
         document.getElementById('toPurposeBtn')?.addEventListener('click', () => {
             this.visitorName = document.getElementById('visitorName')?.value.trim();
@@ -93,59 +83,18 @@ class VisitorKioskManager {
         });
 
         // Back Buttons
-        document.getElementById('backToModeFromInfoBtn')?.addEventListener('click', () => this.showStep('modeSelectionStep'));
-        document.getElementById('backToModeFromCheckoutBtn')?.addEventListener('click', () => this.showStep('modeSelectionStep'));
         document.getElementById('backToInfoBtn')?.addEventListener('click', () => this.showStep('visitorInfoStep'));
         document.getElementById('backToPurposeBtn')?.addEventListener('click', () => this.showStep('purposeStep'));
     }
 
     showStep(stepId) {
-        ['modeSelectionStep', 'visitorInfoStep', 'checkoutStep', 'purposeStep', 'facultyStep', 'completionStep'].forEach(id => {
+        ['visitorInfoStep', 'purposeStep', 'facultyStep', 'completionStep'].forEach(id => {
             document.getElementById(id)?.classList.add('hidden');
         });
         document.getElementById(stepId)?.classList.remove('hidden');
         this.setupLucide();
     }
 
-    async fetchActiveVisitors() {
-        const grid = document.getElementById('activeVisitorsGrid');
-        if (!grid) return;
-
-        grid.innerHTML = `
-            <div class="col-span-full flex justify-center py-10">
-                <div class="animate-spin rounded-full h-8 w-8 border-4 border-slate-400 border-t-transparent"></div>
-            </div>
-        `;
-
-        try {
-            const res = await fetch(`/api/logs?officeId=${this.officeId}`);
-            const allLogs = await res.json();
-
-            // Only filter by: is a visitor visit AND still physically present (no timeOut yet)
-            this.activeVisitors = allLogs.filter(log =>
-                log.studentNumber === 'VISITOR_VISIT' &&
-                !log.timeOut
-            );
-
-            if (this.activeVisitors.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-20 text-center animate-in zoom-in duration-300">
-                        <div class="w-16 h-16 bg-slate-50 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                            <i data-lucide="user-plus" class="w-8 h-8"></i>
-                        </div>
-                        <p class="text-slate-400 font-bold">No active visitors found.</p>
-                        <p class="text-xs text-slate-400 mt-1">If you haven't registered, please go back and select 'Arriving'.</p>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = this.activeVisitors.map(v => `
-                    <button onclick="window.kioskManager.checkoutVisitor('${v.id}', '${v.studentName.replace(/'/g, "\\'")}')"
-                        class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-900 dark:hover:border-white hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center">
-                        <div class="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-slate-900 transition-all">
-                            <i data-lucide="user" class="w-8 h-8"></i>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-lg font-black text-slate-900 dark:text-white leading-tight">${v.studentName}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${v.activity || 'Visit'}</p>
                         </div>
                         <div class="mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-400 group-hover:bg-violet-500 group-hover:text-white transition-all">

@@ -45,51 +45,11 @@
     </header>
 
     <main class="flex-grow flex flex-col p-8 max-w-4xl mx-auto w-full">
-        <!-- Step 0: Mode Selection -->
-        <div id="modeSelectionStep"
-            class="flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="text-center space-y-4">
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 mb-4">
-                    <i data-lucide="hand" class="w-10 h-10"></i>
-                </div>
-                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Welcome Guest!</h2>
-                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Are you arriving or leaving the
-                    department?</p>
-            </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full max-w-2xl px-4">
-                <button id="modeArrivalBtn"
-                    class="group bg-white dark:bg-slate-800 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-violet-900/5 hover:border-violet-500 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center gap-6 text-center">
-                    <div
-                        class="w-20 h-20 rounded-3xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 flex items-center justify-center group-hover:bg-violet-600 group-hover:text-white transition-all duration-500">
-                        <i data-lucide="log-in" class="w-10 h-10"></i>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-black text-slate-900 dark:text-white">I am Arriving</p>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Register your visit
-                        </p>
-                    </div>
-                </button>
-
-                <button id="modeDepartureBtn"
-                    class="group bg-white dark:bg-slate-800 p-10 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/5 hover:border-slate-900 dark:hover:border-white hover:-translate-y-2 transition-all duration-500 flex flex-col items-center gap-6 text-center">
-                    <div
-                        class="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white dark:group-hover:text-slate-900 group-hover:text-white transition-all duration-500">
-                        <i data-lucide="log-out" class="w-10 h-10"></i>
-                    </div>
-                    <div>
-                        <p class="text-2xl font-black text-slate-900 dark:text-white">I am Leaving</p>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Log Out
-                        </p>
-                    </div>
-                </button>
-            </div>
-        </div>
 
         <!-- Step 1: Visitor Information (Arrival) -->
         <div id="visitorInfoStep"
-            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            class="flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div class="text-center space-y-4">
                 <div
                     class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 mb-4">
@@ -132,35 +92,15 @@
                         Next Section
                         <i data-lucide="arrow-right" class="w-6 h-6"></i>
                     </button>
-                    <button id="backToModeFromInfoBtn"
+                    <a href="portal.html"
                         class="inline-flex w-full items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 shadow-sm mt-6">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Not arriving? Change mode
-                    </button>
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Portal
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Step 1: Checkout Selection (Departure) -->
-        <div id="checkoutStep"
-            class="hidden flex-grow flex flex-col items-center justify-center space-y-12 py-10 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
-            <div class="text-center space-y-4">
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-slate-50 dark:bg-slate-700 text-slate-600 mb-4">
-                    <i data-lucide="navigation" class="w-10 h-10"></i>
-                </div>
-                <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Active Visitors</h2>
-                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please tap your name to log out.</p>
-            </div>
 
-            <div id="activeVisitorsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
-                <!-- Injected via JS -->
-            </div>
-
-            <button id="backToModeFromCheckoutBtn"
-                class="inline-flex w-full max-w-sm items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 shadow-sm mt-6">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i> Go Back
-            </button>
-        </div>
 
         <!-- Step 2: Nature of Visit (Arrival) -->
         <div id="purposeStep"
