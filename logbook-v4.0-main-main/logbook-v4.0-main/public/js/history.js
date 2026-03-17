@@ -74,6 +74,17 @@ class HistoryManager {
         if (exportBtn) {
             exportBtn.addEventListener('click', () => this.exportHistory());
         }
+
+        // Close proof modal
+        const closeBtn = document.getElementById('closeProofModal');
+        const closeBtn2 = document.getElementById('closeProofModalBtn');
+        const modal = document.getElementById('proofViewerModal');
+        [closeBtn, closeBtn2].forEach(btn => {
+            btn?.addEventListener('click', () => modal?.classList.add('hidden'));
+        });
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
     }
 
     async loadHistory() {
@@ -235,6 +246,12 @@ class HistoryManager {
                         <span class="px-3 py-1 text-[10px] font-black rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-white border border-blue-100 dark:border-blue-900/20 uppercase tracking-widest leading-none">
                             ${entry.activity || 'N/A'}
                         </span>
+                        ${entry.proofImage ? `
+                            <button onclick="historyManager.viewProof('${entry.proofImage}')" 
+                                class="flex items-center gap-1.5 text-[10px] font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 px-3 py-1.5 rounded-full transition-all border border-violet-100 dark:border-violet-900/50 mt-1.5">
+                                <i data-lucide="image" class="w-3 h-3"></i> View Proof
+                            </button>
+                        ` : ''}
                     </div>
                 </td>
                 <td class="px-6 py-6 text-center">
@@ -372,6 +389,16 @@ class HistoryManager {
         }
         const d = new Date(timeValue);
         return isNaN(d) ? null : d.getTime();
+    }
+
+    viewProof(url) {
+        const modal = document.getElementById('proofViewerModal');
+        const img = document.getElementById('proofImageElement');
+        if (modal && img) {
+            img.src = url;
+            modal.classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+        }
     }
 }
 

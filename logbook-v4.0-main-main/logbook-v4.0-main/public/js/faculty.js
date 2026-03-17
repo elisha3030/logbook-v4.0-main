@@ -238,7 +238,9 @@ async function renderQueue() {
 
         // Proof Action Button
         let proofBtn = '';
-        if (isInService || isCompleted) {
+        const isDocRelated = (log.activity || '').toLowerCase().includes('doc');
+        
+        if ((isInService || isCompleted) && isDocRelated) {
             if (log.proofImage) {
                 proofBtn = `<button onclick="window.open('${log.proofImage}', '_blank')" 
                         class="p-2 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all shadow-sm" title="View Proof">

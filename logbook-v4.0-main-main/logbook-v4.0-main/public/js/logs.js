@@ -134,6 +134,17 @@ class LogsManager {
         if (deleteEntryBtn) {
             deleteEntryBtn.addEventListener('click', () => this.deleteCurrentEntry());
         }
+
+        // Close proof modal
+        const closeBtn = document.getElementById('closeProofModal');
+        const closeBtn2 = document.getElementById('closeProofModalBtn');
+        const modal = document.getElementById('proofViewerModal');
+        [closeBtn, closeBtn2].forEach(btn => {
+            btn?.addEventListener('click', () => modal?.classList.add('hidden'));
+        });
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
     }
 
     async loadEntries() {
@@ -721,6 +732,13 @@ class LogsManager {
                         </div>
                     </div>
 
+                    ${entry.proofImage ? `
+                        <button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-violet-600 text-white shadow-lg shadow-violet-900/20 hover:bg-violet-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.viewProof('${entry.proofImage}')">
+                            <i data-lucide="image" class="w-4 h-4"></i>
+                            View Signed Document Proof
+                        </button>
+                    ` : ''}
+
                     ${!entry.timeOutFormatted && entry.status === 'pending'
                 ? `<button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.completeEntry('${entry.id}')">
                                 <i data-lucide="check" class="w-4 h-4"></i>
@@ -740,6 +758,16 @@ class LogsManager {
         const modal = document.getElementById('entryModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+    }
+
+    viewProof(url) {
+        const modal = document.getElementById('proofViewerModal');
+        const img = document.getElementById('proofImageElement');
+        if (modal && img) {
+            img.src = url;
+            modal.classList.remove('hidden');
+            if (window.lucide) window.lucide.createIcons();
+        }
     }
 
     async deleteCurrentEntry() {
