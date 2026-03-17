@@ -448,7 +448,7 @@ class StudentKioskManager {
                         proofAction = `
                             <button onclick="window.kioskManager.viewProof('${log.proofImage}')" 
                                 class="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 px-3 py-1.5 rounded-full transition-all border border-violet-100 dark:border-violet-900/50">
-                                <i data-lucide="image" class="w-3 h-3"></i> View Proof
+                                <i data-lucide="image" class="w-3 h-3"></i> View Photo
                             </button>
                         `;
                     }

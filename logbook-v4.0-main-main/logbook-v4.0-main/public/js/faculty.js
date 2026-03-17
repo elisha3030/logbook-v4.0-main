@@ -55,6 +55,19 @@ function formatDuration(ms) {
     return `${hrs}h ${mins}m`;
 }
 
+function viewProof(url) {
+    const modal = document.getElementById('proofViewerModal');
+    const img = document.getElementById('proofImageElement');
+    if (modal && img) {
+        img.src = url;
+        modal.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+    }
+}
+
+// Make globally available for onclick
+window.viewProof = viewProof;
+
 // ----------------------------------------------------------------
 // Faculty Selection Grid (for No Staff state)
 // ----------------------------------------------------------------
@@ -242,9 +255,10 @@ async function renderQueue() {
         
         if ((isInService || isCompleted) && isDocRelated) {
             if (log.proofImage) {
-                proofBtn = `<button onclick="window.open('${log.proofImage}', '_blank')" 
-                        class="p-2 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all shadow-sm" title="View Proof">
-                        <i data-lucide="image" class="w-4 h-4"></i>
+                proofBtn = `<button onclick="viewProof('${log.proofImage}')" 
+                        class="px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all shadow-sm flex items-center gap-2 text-[10px] font-black uppercase tracking-wider" title="View Photo">
+                        <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                        <span>View Photo</span>
                     </button>`;
             } else {
                 proofBtn = `<button onclick="handleProofUpload('${escape(log.id)}')" 
@@ -707,6 +721,16 @@ function init() {
 
     // Proof upload listener
     document.getElementById('proofUploadInput')?.addEventListener('change', handleFileSelected);
+
+    // Proof modal close listeners
+    const closeModal = () => {
+        document.getElementById('proofViewerModal')?.classList.add('hidden');
+    };
+    document.getElementById('closeProofModal')?.addEventListener('click', closeModal);
+    document.getElementById('closeProofModalBtn')?.addEventListener('click', closeModal);
+    document.getElementById('proofViewerModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'proofViewerModal') closeModal();
+    });
 }
 
 if (document.readyState === 'loading') {

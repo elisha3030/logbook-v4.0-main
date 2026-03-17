@@ -735,7 +735,7 @@ class LogsManager {
                     ${entry.proofImage ? `
                         <button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-violet-600 text-white shadow-lg shadow-violet-900/20 hover:bg-violet-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.viewProof('${entry.proofImage}')">
                             <i data-lucide="image" class="w-4 h-4"></i>
-                            View Signed Document Proof
+                            View Photo
                         </button>
                     ` : ''}
 
