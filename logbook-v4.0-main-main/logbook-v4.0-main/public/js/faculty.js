@@ -58,8 +58,21 @@ function formatDuration(ms) {
 function viewProof(url) {
     const modal = document.getElementById('proofViewerModal');
     const img = document.getElementById('proofImageElement');
-    if (modal && img) {
-        img.src = url;
+    const iframe = document.getElementById('proofPdfElement');
+    if (modal) {
+        if (url.toLowerCase().endsWith('.pdf')) {
+            if (img) img.classList.add('hidden');
+            if (iframe) {
+                iframe.src = url;
+                iframe.classList.remove('hidden');
+            }
+        } else {
+            if (iframe) iframe.classList.add('hidden');
+            if (img) {
+                img.src = url;
+                img.classList.remove('hidden');
+            }
+        }
         modal.classList.remove('hidden');
         if (window.lucide) window.lucide.createIcons();
     }
@@ -256,9 +269,9 @@ async function renderQueue() {
         if ((isInService || isCompleted) && isDocRelated) {
             if (log.proofImage) {
                 proofBtn = `<button onclick="viewProof('${log.proofImage}')" 
-                        class="px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all shadow-sm flex items-center gap-2 text-[10px] font-black uppercase tracking-wider" title="View Photo">
-                        <i data-lucide="image" class="w-3.5 h-3.5"></i>
-                        <span>View Photo</span>
+                        class="px-3 py-1.5 rounded-xl bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all shadow-sm flex items-center gap-2 text-[10px] font-black uppercase tracking-wider" title="View Document">
+                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                        <span>View Proof</span>
                     </button>`;
             } else {
                 proofBtn = `<button onclick="handleProofUpload('${escape(log.id)}')" 
@@ -495,8 +508,8 @@ async function handleFileSelected(event) {
     const file = event.target.files[0];
     if (!file || !currentUploadLogId) return;
 
-    if (!file.type.startsWith('image/')) {
-        showToast('Please select an image file', 'error');
+    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+        showToast('Please select an image or PDF file', 'error');
         return;
     }
 

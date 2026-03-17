@@ -340,7 +340,7 @@
             </div>
         </div>
         <!-- Hidden file input for proof upload -->
-        <input type="file" id="proofUploadInput" accept="image/*" class="hidden">
+        <input type="file" id="proofUploadInput" accept="image/*,application/pdf" class="hidden">
     </main>
 
     <!-- Proof Viewer Modal -->
@@ -354,6 +354,7 @@
             </div>
             <div class="p-8 overflow-auto flex justify-center bg-slate-50 dark:bg-slate-900/50">
                 <img id="proofImageElement" src="" alt="Proof" class="max-w-full rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <iframe id="proofPdfElement" class="hidden w-full h-[70vh] rounded-xl border border-slate-200 dark:border-slate-700"></iframe>
             </div>
             <div class="p-6 border-t border-slate-100 dark:border-slate-700 flex justify-end bg-white dark:bg-slate-800">
                 <button id="closeProofModalBtn" class="bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold px-8 py-3 rounded-2xl hover:-translate-y-1 transition-all">Close</button>

@@ -734,8 +734,8 @@ class LogsManager {
 
                     ${entry.proofImage ? `
                         <button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-violet-600 text-white shadow-lg shadow-violet-900/20 hover:bg-violet-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.viewProof('${entry.proofImage}')">
-                            <i data-lucide="image" class="w-4 h-4"></i>
-                            View Photo
+                            <i data-lucide="file-check" class="w-4 h-4"></i>
+                            View Proof
                         </button>
                     ` : ''}
 
@@ -763,8 +763,21 @@ class LogsManager {
     viewProof(url) {
         const modal = document.getElementById('proofViewerModal');
         const img = document.getElementById('proofImageElement');
-        if (modal && img) {
-            img.src = url;
+        const iframe = document.getElementById('proofPdfElement');
+        if (modal) {
+            if (url.toLowerCase().endsWith('.pdf')) {
+                if (img) img.classList.add('hidden');
+                if (iframe) {
+                    iframe.src = url;
+                    iframe.classList.remove('hidden');
+                }
+            } else {
+                if (iframe) iframe.classList.add('hidden');
+                if (img) {
+                    img.src = url;
+                    img.classList.remove('hidden');
+                }
+            }
             modal.classList.remove('hidden');
             if (window.lucide) window.lucide.createIcons();
         }
