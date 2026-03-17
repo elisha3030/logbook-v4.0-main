@@ -67,7 +67,7 @@
                     </div>
                     <div>
                         <p class="text-2xl font-black text-slate-900 dark:text-white">I am Arriving</p>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Clock In
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Log In
                         </p>
                     </div>
                 </button>
@@ -80,7 +80,7 @@
                     </div>
                     <div>
                         <p class="text-2xl font-black text-slate-900 dark:text-white">I am Leaving</p>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Clock Out
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Log Out
                         </p>
                     </div>
                 </button>
@@ -137,8 +137,8 @@
                         <i data-lucide="arrow-right" class="w-6 h-6"></i>
                     </button>
                     <button id="backToModeFromInfoBtn"
-                        class="text-slate-400 hover:text-slate-600 font-bold text-xs uppercase tracking-widest transition-all">
-                        ← Not arriving? Change mode
+                        class="inline-flex w-full items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 shadow-sm mt-6">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Not arriving? Change mode
                     </button>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                     <i data-lucide="navigation" class="w-10 h-10"></i>
                 </div>
                 <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Active Employees</h2>
-                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please tap your name to clock out.</p>
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please tap your name to log out.</p>
             </div>
 
             <div id="activeEmployeesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
@@ -161,8 +161,8 @@
             </div>
 
             <button id="backToModeFromCheckoutBtn"
-                class="text-slate-400 hover:text-slate-600 font-bold text-sm underline underline-offset-8 decoration-slate-200 transition-all uppercase tracking-widest">
-                ← Go Back
+                class="inline-flex w-full max-w-sm items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 shadow-sm mt-6">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Go Back
             </button>
         </div>
 
@@ -175,7 +175,7 @@
                     <i data-lucide="circle-dot" class="w-10 h-10"></i>
                 </div>
                 <h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Nature of Log</h2>
-                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please select the reason for clocking
+                <p class="text-slate-500 dark:text-slate-400 font-medium text-lg">Please select the reason for logging
                     in.</p>
             </div>
 
@@ -183,9 +183,26 @@
                 <!-- Injected via JS -->
             </div>
 
+            <!-- Custom Purpose Input (Hidden by default) -->
+            <div id="customPurposeContainer" class="hidden w-full max-w-xl animate-in fade-in slide-in-from-top-4 duration-300">
+                <div class="space-y-4 bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-xl">
+                    <label for="customPurposeInput" class="block text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-300 ml-1">
+                        Please specify your activity
+                    </label>
+                    <div class="flex gap-4">
+                        <input type="text" id="customPurposeInput" placeholder="e.g. Setting up equipment"
+                            class="block w-full px-6 py-4 bg-slate-50 dark:bg-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl focus:ring-4 focus:ring-slate-500/10 focus:border-slate-500 outline-none transition-all font-bold text-lg">
+                        <button id="submitCustomPurposeBtn"
+                            class="bg-slate-900 dark:bg-white hover:bg-black dark:hover:bg-slate-200 text-white dark:text-slate-900 font-black px-8 rounded-2xl shadow-xl shadow-slate-900/20 transition-all flex items-center justify-center transform hover:-translate-y-1 active:scale-95">
+                            <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <button id="backToInfoBtn"
-                class="text-slate-400 hover:text-slate-600 font-bold text-sm uppercase tracking-widest transition-all">
-                ← Go Back
+                class="inline-flex w-full max-w-sm items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700 shadow-sm mt-6">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Go Back
             </button>
         </div>
 

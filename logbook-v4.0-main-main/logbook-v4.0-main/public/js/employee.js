@@ -115,7 +115,22 @@ class EmployeeKioskManager {
         // Back Buttons
         document.getElementById('backToModeFromInfoBtn')?.addEventListener('click', () => this.showStep('modeSelectionStep'));
         document.getElementById('backToModeFromCheckoutBtn')?.addEventListener('click', () => this.showStep('modeSelectionStep'));
-        document.getElementById('backToInfoBtn')?.addEventListener('click', () => this.showStep('employeeInfoStep'));
+        document.getElementById('backToInfoBtn')?.addEventListener('click', () => {
+            document.getElementById('customPurposeContainer')?.classList.add('hidden');
+            document.getElementById('purposeGrid')?.classList.remove('hidden');
+            this.showStep('employeeInfoStep');
+        });
+
+        // Submit Custom Purpose
+        document.getElementById('submitCustomPurposeBtn')?.addEventListener('click', () => {
+            const customInput = document.getElementById('customPurposeInput');
+            const val = customInput?.value.trim();
+            if(!val) {
+                this.showToast('Please specify your activity.', 'error');
+                return;
+            }
+            this.submitLog(val);
+        });
     }
 
     showStep(stepId) {
@@ -168,7 +183,7 @@ class EmployeeKioskManager {
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${e.activity}</p>
                         </div>
                         <div class="mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-200 group-hover:text-white dark:group-hover:text-slate-900 transition-all">
-                            Clock Out
+                            Log Out
                         </div>
                     </button>
                 `).join('');
@@ -188,15 +203,14 @@ class EmployeeKioskManager {
             });
 
             if (res.ok) {
-                document.getElementById('completionTitle').textContent = 'Clocked Out!';
-                document.getElementById('completionMessage').textContent = `You have been successfully clocked out, ${name}. Have a great day!`;
-                this.showStep('completionStep');
+                this.showToast(`Log out successful for ${name}!`);
+                this.fetchActiveEmployees(); // Refresh the list without leaving the page
             } else {
                 throw new Error('Checkout failed');
             }
         } catch (e) {
             console.error('Checkout error:', e);
-            this.showToast('Failed to clock out. Please try again.', 'error');
+            this.showToast('Failed to log out. Please try again.', 'error');
         }
     }
 
@@ -204,19 +218,47 @@ class EmployeeKioskManager {
         const grid = document.getElementById('purposeGrid');
         if (!grid) return;
 
-        let purposes = ['Regular Duty', 'Overtime', 'Meeting', 'Consultation Hours', 'Extracurricular / Club', 'Other'];
+        // Updated logbook terminology
+        let purposes = ['Class/Lecture', 'Meeting', 'Research', 'Consultation', 'Official Business', 'Other'];
 
-        grid.innerHTML = purposes.map(p => `
-            <button onclick="window.kioskManager.submitLog('${p.replace(/'/g, "\\'")}')"
-                class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-900 dark:hover:border-white hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 transition-all">
-                    <i data-lucide="circle-dot" class="w-8 h-8"></i>
-                </div>
-                <p class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">${p}</p>
-            </button>
-        `).join('');
+        grid.innerHTML = purposes.map(p => {
+            if (p === 'Other') {
+                return `
+                    <button onclick="window.kioskManager.showCustomPurpose()"
+                        class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-900 dark:hover:border-white hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 transition-all">
+                            <i data-lucide="more-horizontal" class="w-8 h-8"></i>
+                        </div>
+                        <p class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">${p}</p>
+                    </button>
+                `;
+            } else {
+                return `
+                    <button onclick="window.kioskManager.submitLog('${p.replace(/'/g, "\\'")}')"
+                        class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-900 dark:hover:border-white hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center group-hover:bg-slate-900 dark:group-hover:bg-white group-hover:text-white dark:group-hover:text-slate-900 transition-all">
+                            <i data-lucide="circle-dot" class="w-8 h-8"></i>
+                        </div>
+                        <p class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">${p}</p>
+                    </button>
+                `;
+            }
+        }).join('');
 
         this.setupLucide();
+    }
+
+    showCustomPurpose() {
+        document.getElementById('purposeGrid')?.classList.add('hidden');
+        const customContainer = document.getElementById('customPurposeContainer');
+        if (customContainer) {
+            customContainer.classList.remove('hidden');
+            const input = document.getElementById('customPurposeInput');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+        }
     }
 
     async submitLog(purpose) {

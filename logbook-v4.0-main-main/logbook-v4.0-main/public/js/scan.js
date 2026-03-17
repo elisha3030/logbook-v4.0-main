@@ -324,7 +324,7 @@ class ScannerManager {
                         const autoResult = await autoRes.json();
                         if (!autoRes.ok) throw new Error(autoResult.error);
                         this.currentLogId = autoResult.id;
-                        this.showToast(`Auto check-in: ${student.name}`);
+                        this.showToast(`Auto log-in: ${student.name}`);
                         this.resetPage();
                     } catch (e) {
                         this.showToast('Auto-submit failed, showing form', 'error');
@@ -439,7 +439,7 @@ class ScannerManager {
                     </div>
                     <div>
                         <h3 class="text-white text-2xl font-black tracking-tight drop-shadow-sm">Active Session Found</h3>
-                        <p class="text-white/90 text-[10px] font-black uppercase tracking-[0.2em] mt-1 drop-shadow-sm">CHECKOUT REQUIRED</p>
+                        <p class="text-white/90 text-[10px] font-black uppercase tracking-[0.2em] mt-1 drop-shadow-sm">LOG OUT REQUIRED</p>
                     </div>
                 </div>
 
@@ -554,7 +554,7 @@ class ScannerManager {
 
         } catch (error) {
             console.error('❌ Auto checkout failed:', error);
-            this.showToast('Failed to check out session.', 'error');
+            this.showToast('Failed to log out session.', 'error');
         }
     }
 
@@ -586,7 +586,7 @@ class ScannerManager {
 
         } catch (error) {
             console.error('❌ Selective log out failed:', error);
-            this.showToast('Failed to check out selected sessions.', 'error');
+            this.showToast('Failed to log out selected sessions.', 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = originalText;
@@ -819,7 +819,7 @@ class ScannerManager {
     }
 
     async timeOutAll() {
-        const confirmed = confirm('Check out ALL currently active sessions?\nThis will close every open visit log.');
+        const confirmed = confirm('Log out ALL currently active sessions?\nThis will close every open visit log.');
         if (!confirmed) return;
 
         const btn = document.getElementById('timeOutAllBtn');
@@ -859,7 +859,7 @@ class ScannerManager {
                     </div>
                 </div>
                 <h3 class="text-3xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">System Ready</h3>
-                <p class="text-lg font-bold text-slate-500 dark:text-slate-300 mb-8 max-w-sm mx-auto leading-relaxed">Waiting for student...<br/>Simply scan the NFC chip to log in, and tap again to check out.</p>
+                <p class="text-lg font-bold text-slate-500 dark:text-slate-300 mb-8 max-w-sm mx-auto leading-relaxed">Waiting for student...<br/>Simply scan the NFC chip to log in, and tap again to log out.</p>
                 
                 <div class="inline-flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-slate-200">
                     <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>

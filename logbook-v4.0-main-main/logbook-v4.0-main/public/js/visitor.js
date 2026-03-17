@@ -149,7 +149,7 @@ class VisitorKioskManager {
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${v.activity || 'Visit'}</p>
                         </div>
                         <div class="mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-400 group-hover:bg-violet-500 group-hover:text-white transition-all">
-                            Check Out
+                            Log Out
                         </div>
                     </button>
                 `).join('');
@@ -169,15 +169,14 @@ class VisitorKioskManager {
             });
 
             if (res.ok) {
-                document.getElementById('completionTitle').textContent = 'Goodbye!';
-                document.getElementById('completionMessage').textContent = `You have been successfully checked out, ${name}. Have a safe trip!`;
-                this.showStep('completionStep');
+                this.showToast(`Log out successful for ${name}!`);
+                this.fetchActiveVisitors(); // Refresh the list
             } else {
                 throw new Error('Checkout failed');
             }
         } catch (e) {
             console.error('Checkout error:', e);
-            this.showToast('Failed to check out. Please ask staff for assistance.', 'error');
+            this.showToast('Failed to log out. Please ask staff for assistance.', 'error');
         }
     }
 
