@@ -103,7 +103,7 @@ async function renderFacultySelection() {
         } else {
             grid.innerHTML = faculties.map(f => `
                 <a href="faculty.html?staff=${encodeURIComponent(f.name)}"
-                   class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-blue-500 hover:-translate-y-1 transition-all flex flex-col items-center gap-5 text-center">
+                   class="group bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-blue-500 hover:-translate-y-1 transition-all flex flex-col items-center gap-5 text-center w-full max-w-sm">
                     <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-slate-100 flex-shrink-0">
                         ${f.photoURL ? `<img src="${f.photoURL}" class="w-full h-full object-cover">` : `<div class="w-full h-full bg-blue-50 flex items-center justify-center text-blue-500 font-black text-xl">${(f.name || 'S').charAt(0).toUpperCase()}</div>`}
                     </div>

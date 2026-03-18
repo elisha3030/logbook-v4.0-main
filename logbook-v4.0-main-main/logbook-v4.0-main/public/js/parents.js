@@ -173,7 +173,7 @@ class ParentsKioskManager {
             // Simple option to skip faculty selection
             grid.innerHTML += `
                 <button onclick="window.kioskManager.submitVisit('General Staff')"
-                    class="group bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 hover:border-slate-500 hover:-translate-y-1 transition-all flex flex-col items-center gap-4 text-center">
+                    class="group bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl shadow-slate-200/50 transition-all flex flex-col items-center gap-4 text-center">
                     <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
                         <i data-lucide="users" class="w-8 h-8"></i>
                     </div>
