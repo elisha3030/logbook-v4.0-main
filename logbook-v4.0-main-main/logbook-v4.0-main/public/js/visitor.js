@@ -95,20 +95,7 @@ class VisitorKioskManager {
         this.setupLucide();
     }
 
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${v.activity || 'Visit'}</p>
-                        </div>
-                        <div class="mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-[10px] font-black uppercase text-slate-400 group-hover:bg-violet-500 group-hover:text-white transition-all">
-                            Log Out
-                        </div>
-                    </button>
-                `).join('');
-            }
-        } catch (e) {
-            console.error('Fetch active visitors error:', e);
-            grid.innerHTML = '<p class="text-red-500 font-bold col-span-full py-10 text-center">Error loading visitors.</p>';
-        }
-        this.setupLucide();
-    }
+
 
     async checkoutVisitor(logId, name) {
         try {
