@@ -8,7 +8,11 @@
 const params = new URLSearchParams(window.location.search);
 const staffName = params.get('staff') || '';
 
+import { loadSystemSettings } from './settings.js';
+
 let autoRefreshTimer = null;
+let activeClockInLogId = null;
+let officeId = 'engineering-office';
 
 // ----------------------------------------------------------------
 // Toast
@@ -80,6 +84,96 @@ function viewProof(url) {
 
 // Make globally available for onclick
 window.viewProof = viewProof;
+
+// ----------------------------------------------------------------
+// Employee Clock-out (Faculty Mode)
+// ----------------------------------------------------------------
+async function checkClockInStatus() {
+    if (!staffName) return;
+    try {
+        const res = await fetch(`/api/logs?officeId=${officeId}`);
+        const logs = await res.json();
+        
+        // Find if this staff member has an active EMPLOYEE_LOG session
+        const activeLog = logs.find(log => 
+            log.studentNumber === 'EMPLOYEE_LOG' && 
+            log.studentName?.toLowerCase() === staffName.toLowerCase() && 
+            !log.timeOut
+        );
+
+        const btn = document.getElementById('clockOutBtn');
+        if (activeLog) {
+            activeClockInLogId = activeLog.id;
+            btn?.classList.remove('hidden');
+        } else {
+            activeClockInLogId = null;
+            btn?.classList.add('hidden');
+        }
+    } catch (e) {
+        console.error('⚠️ Error checking clock-in status:', e);
+    }
+}
+
+async function handleClockOut() {
+    if (!staffName) return;
+
+    const btn = document.getElementById('clockOutBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processing…`;
+        if (window.lucide) window.lucide.createIcons();
+    }
+
+    try {
+        // Fetch current logs to find all active ones for this staff
+        const res = await fetch(`/api/logs?officeId=${officeId}`);
+        if (!res.ok) throw new Error('Failed to fetch logs');
+        const logs = await res.json();
+        
+        const activeLogs = logs.filter(log => 
+            log.studentNumber === 'EMPLOYEE_LOG' && 
+            log.studentName?.toLowerCase() === staffName.toLowerCase() && 
+            !log.timeOut
+        );
+
+        if (activeLogs.length === 0) {
+            showToast('No active clock-in found.');
+            if (btn) btn.classList.add('hidden');
+            return;
+        }
+
+        // Process all active logs
+        let successCount = 0;
+        for (const log of activeLogs) {
+            const patchRes = await fetch(`/api/logs/${log.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (patchRes.ok) successCount++;
+        }
+
+        if (successCount > 0) {
+            showToast(`You have clocked out successfully (${successCount} session${successCount > 1 ? 's' : ''}).`);
+            activeClockInLogId = null;
+            if (btn) btn.classList.add('hidden');
+            // Refresh status check
+            await checkClockInStatus();
+            // Also refresh queue if on faculty hub
+            if (typeof fetchQueue === 'function') fetchQueue();
+        } else {
+            throw new Error('Clock-out failed');
+        }
+    } catch (error) {
+        console.error('❌ Clock-out error:', error);
+        showToast('Error during clock-out. Please try again.', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="clock" class="w-4 h-4"></i> Clock Out`;
+            if (window.lucide) window.lucide.createIcons();
+        }
+    }
+}
 
 // ----------------------------------------------------------------
 // Faculty Selection Grid (for No Staff state)
@@ -690,11 +784,17 @@ async function generatePDF() {
 // ----------------------------------------------------------------
 // Init
 // ----------------------------------------------------------------
-function init() {
+async function init() {
     const noFacultyState = document.getElementById('noFacultyState');
     const statsRow = document.getElementById('statsRow');
     const queueCard = document.getElementById('queueCard');
     const facultyNameHeader = document.getElementById('facultyNameHeader');
+
+    // Load office settings
+    try {
+        const settings = await loadSystemSettings();
+        if (settings.officeId) officeId = settings.officeId;
+    } catch (e) { console.warn('Could not load settings'); }
 
     if (!staffName) {
         noFacultyState?.classList.remove('hidden');
@@ -714,11 +814,13 @@ function init() {
     // Initial load
     renderQueue();
     renderSummary();
+    checkClockInStatus();
 
     // Auto-refresh every 10s
     autoRefreshTimer = setInterval(() => {
         renderQueue();
         renderSummary();
+        checkClockInStatus();
     }, 10000);
 
     // Manual refresh button
@@ -730,6 +832,13 @@ function init() {
     // PDF download button
     document.getElementById('downloadPdfBtn')?.addEventListener('click', () => {
         generatePDF();
+    });
+
+    // Clock out button
+    document.getElementById('clockOutBtn')?.addEventListener('click', () => {
+        if (confirm('Are you sure you want to clock out?')) {
+            handleClockOut();
+        }
     });
 
     // Proof upload listener

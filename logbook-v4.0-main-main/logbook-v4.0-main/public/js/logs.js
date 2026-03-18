@@ -145,6 +145,15 @@ class LogsManager {
         modal?.addEventListener('click', (e) => {
             if (e.target === modal) modal.classList.add('hidden');
         });
+
+        // Clock out in modal
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#modalClockOutBtn');
+            if (btn) {
+                const entryId = btn.dataset.entryId;
+                this.handleClockOut(entryId);
+            }
+        });
     }
 
     async loadEntries() {
@@ -620,6 +629,44 @@ class LogsManager {
         return this.updateEntryStatus(entryId, 'complete');
     }
 
+    async handleClockOut(entryId) {
+        if (!confirm('Are you sure you want to clock out this employee?')) return;
+        
+        const btn = document.getElementById('modalClockOutBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processing…`;
+            if (window.lucide) window.lucide.createIcons();
+        }
+
+        try {
+            const res = await fetch(`/api/logs/${entryId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (res.ok) {
+                this.showToast(`Employee clocked out successfully.`);
+                // Reload and refresh view
+                await this.loadEntries();
+                if (this.currentEntryId === entryId) {
+                    this.viewEntry(entryId);
+                }
+            } else {
+                throw new Error('Clock-out failed');
+            }
+        } catch (e) {
+            console.error('Clock-out error:', e);
+            this.showToast('Failed to clock out. Please try again.', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="clock" class="w-4 h-4"></i> Clock Out Now`;
+                if (window.lucide) window.lucide.createIcons();
+            }
+        }
+    }
+
     async updateEntryStatus(entryId, newStatus) {
         try {
             console.log(`🔄 Updating entry ${entryId} to status: ${newStatus}`);
@@ -740,12 +787,20 @@ class LogsManager {
                     ` : ''}
 
                     ${!entry.timeOutFormatted && entry.status === 'pending'
-                ? `<button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.completeEntry('${entry.id}')">
-                                <i data-lucide="check" class="w-4 h-4"></i>
-                                Mark Activity as Done
-                            </button>`
-                : ''
-            }
+                        ? `<button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.completeEntry('${entry.id}')">
+                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                        Mark Activity as Done
+                                    </button>`
+                        : ''
+                    }
+
+                    ${!entry.timeOutFormatted && entry.studentNumber === 'EMPLOYEE_LOG'
+                        ? `<button id="modalClockOutBtn" data-entry-id="${entry.id}" class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-red-600 text-white shadow-lg shadow-red-900/20 hover:bg-red-700 transition-all font-black uppercase tracking-widest text-xs mt-2">
+                                        <i data-lucide="clock" class="w-4 h-4"></i>
+                                        Clock Out Now
+                                    </button>`
+                        : ''
+                    }
                 </div>
             </div>
         `;
