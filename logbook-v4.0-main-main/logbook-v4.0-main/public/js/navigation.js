@@ -57,6 +57,21 @@ async function loadFacultySidebar() {
 
     placeholder.innerHTML = html;
 
+    // Inject Employee Monitoring block for Dr. Mariciel if on faculty hub
+    const employeeMonitorHtml = `
+        <div class="mt-6 mb-2">
+            <div class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-3">
+                Administrative
+            </div>
+            <a href="faculty.html?staff=Employee+Hub#staffPresenceSection"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-bold text-sm text-blue-400 bg-blue-500/5 border border-blue-500/20 group">
+                <i data-lucide="shield-check" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                Employee Hub
+            </a>
+        </div>
+    `;
+    placeholder.insertAdjacentHTML('afterend', employeeMonitorHtml);
+
     // Re-initialize Lucide icons for freshly injected icons
     if (window.lucide) {
         lucide.createIcons();

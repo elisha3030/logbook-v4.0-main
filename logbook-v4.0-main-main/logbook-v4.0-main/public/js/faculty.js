@@ -6,13 +6,16 @@
  */
 
 const params = new URLSearchParams(window.location.search);
-const staffName = params.get('staff') || '';
+const staffName = params.get('staff');
+let officeId = 'engineering-office'; // default, overridden by settings
+
+// Helper to normalize names (lowercase, single space only, trimmed)
+const normalize = (s) => (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
 
 import { loadSystemSettings } from './settings.js';
 
 let autoRefreshTimer = null;
 let activeClockInLogId = null;
-let officeId = 'engineering-office';
 
 // ----------------------------------------------------------------
 // Toast
@@ -97,7 +100,7 @@ async function checkClockInStatus() {
         // Find if this staff member has an active EMPLOYEE_LOG session
         const activeLog = logs.find(log => 
             log.studentNumber === 'EMPLOYEE_LOG' && 
-            log.studentName?.toLowerCase() === staffName.toLowerCase() && 
+            normalize(log.studentName) === normalize(staffName) && 
             !log.timeOut
         );
 
@@ -132,7 +135,7 @@ async function handleClockOut() {
         
         const activeLogs = logs.filter(log => 
             log.studentNumber === 'EMPLOYEE_LOG' && 
-            log.studentName?.toLowerCase() === staffName.toLowerCase() && 
+            normalize(log.studentName) === normalize(staffName) && 
             !log.timeOut
         );
 
@@ -145,9 +148,10 @@ async function handleClockOut() {
         // Process all active logs
         let successCount = 0;
         for (const log of activeLogs) {
-            const patchRes = await fetch(`/api/logs/${log.id}`, {
+            const patchRes = await fetch(`/api/logs/${log.id}/complete`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ staffName: staffName })
             });
             if (patchRes.ok) successCount++;
         }
@@ -156,10 +160,11 @@ async function handleClockOut() {
             showToast(`You have clocked out successfully (${successCount} session${successCount > 1 ? 's' : ''}).`);
             activeClockInLogId = null;
             if (btn) btn.classList.add('hidden');
+            // Refresh hub data
+            renderQueue();
+            renderSummary();
             // Refresh status check
             await checkClockInStatus();
-            // Also refresh queue if on faculty hub
-            if (typeof fetchQueue === 'function') fetchQueue();
         } else {
             throw new Error('Clock-out failed');
         }
@@ -174,6 +179,33 @@ async function handleClockOut() {
         }
     }
 }
+
+// ----------------------------------------------------------------
+// Individual Staff Sign Out (Administrative)
+// ----------------------------------------------------------------
+async function logOutStaff(logId) {
+    if (!confirm('Sign out this faculty member?')) return;
+    
+    try {
+        const res = await fetch(`/api/logs/${logId}/complete`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ staffName: staffName || 'Dr. Mariciel Teogangco' })
+        });
+        
+        if (res.ok) {
+            showToast('Staff member signed out successfully.');
+            if (typeof renderQueue === 'function') renderQueue();
+            if (typeof renderSummary === 'function') renderSummary();
+        } else {
+            throw new Error('Sign out failed');
+        }
+    } catch (e) {
+        console.error('Staff sign out error:', e);
+        showToast('Failed to sign out staff.', 'error');
+    }
+}
+window.logOutStaff = logOutStaff; // Expose globally for inline onclick
 
 // ----------------------------------------------------------------
 // Faculty Selection Grid (for No Staff state)
@@ -223,29 +255,39 @@ async function renderFacultySelection() {
 // ----------------------------------------------------------------
 async function fetchQueue() {
     try {
-        const res = await fetch('/api/logs');
+        const res = await fetch(`/api/logs?officeId=${officeId}`);
         const allLogs = await res.json();
 
-        const today = new Date().toISOString().slice(0, 10);
+        const today = new Date().toLocaleDateString('en-CA');
 
-        // Filter: logs assigned to this faculty, checked in today, not yet checked out
-        const pending = allLogs.filter(l =>
-            l.staff === staffName &&
-            l.timeOut === null &&
-            l.status !== 'completed' &&
-            (l.date === today || (l.timeIn && l.timeIn.startsWith(today)))
+        // --- GENERAL EMPLOYEE MONITORING ---
+        // Grab all active employee logs across the entire system, ignoring the current staffName
+        const staffPresence = allLogs.filter(l => 
+            l.studentNumber === 'EMPLOYEE_LOG' && 
+            l.timeOut === null && 
+            l.status !== 'completed'
         );
 
-        // Include completed sessions today too
+        // --- STUDENT QUEUE FOR CURRENT FACULTY ---
+        // Filter student logs assigned specifically to this faculty
+        const pending = allLogs.filter(l =>
+            l.studentNumber !== 'EMPLOYEE_LOG' &&
+            normalize(l.staff) === normalize(staffName) &&
+            l.timeOut === null &&
+            l.status !== 'completed'
+        );
+
         const completed = allLogs.filter(l =>
-            l.staff === staffName &&
+            l.studentNumber !== 'EMPLOYEE_LOG' &&
+            normalize(l.staff) === normalize(staffName) &&
             l.status === 'completed' &&
             (l.date === today || (l.timeIn && l.timeIn.startsWith(today)))
         );
 
-        return { pending, completed, all: [...pending, ...completed] };
+        return { pending, completed, staffPresence, all: [...pending, ...completed] };
     } catch (e) {
-        return { pending: [], completed: [], all: [] };
+        console.error('⚠️ Error fetching queue:', e);
+        return { pending: [], completed: [], staffPresence: [], all: [] };
     }
 }
 
@@ -256,7 +298,8 @@ async function renderQueue() {
     const tbody = document.getElementById('queueTableBody');
     if (!tbody) return;
 
-    const { pending, completed, all } = await fetchQueue();
+    const { pending, completed, staffPresence, all } = await fetchQueue();
+    const now = new Date();
 
     // Update stats
     document.getElementById('statPending').textContent = pending.length;
@@ -266,6 +309,80 @@ async function renderQueue() {
     const lastRefreshedEl = document.getElementById('lastRefreshed');
     if (lastRefreshedEl) {
         lastRefreshedEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+    }
+
+    // ── Staff Presence Monitor ──
+    // Render Staff Presence (Employee Monitoring)
+    // Now visible to all faculty as general monitoring
+    const staffPresenceContainer = document.getElementById('staffPresenceContainer');
+    const staffPresenceBody = document.getElementById('staffPresenceTableBody');
+    
+    if (staffPresenceContainer && staffPresenceBody) {
+        staffPresenceContainer.classList.remove('hidden');
+        
+        if (staffPresence.length > 0) {
+            staffPresenceBody.innerHTML = staffPresence.map(log => {
+                const checkIn = new Date(log.timeIn);
+                const onSiteMs = now - checkIn;
+                return `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <td class="px-8 py-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black flex-shrink-0">
+                                    ${escape((log.studentName || 'S')[0]).toUpperCase()}
+                                </div>
+                                <p class="font-bold text-slate-800 dark:text-white text-sm leading-none">${escape(log.studentName || '—')}</p>
+                            </div>
+                        </td>
+                        <td class="px-6 py-5 underline decoration-slate-200 underline-offset-4 decoration-dotted">
+                            <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${escape(log.studentId || 'Faculty')}</p>
+                        </td>
+                        <td class="px-6 py-5 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            ${escape(log.activity || '—')}
+                        </td>
+                        <td class="px-6 py-5 text-center text-sm font-black text-blue-500">
+                            ${formatDuration(onSiteMs)}
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-200">
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> On-Site
+                             </span>
+                        </td>
+                        <td class="px-8 py-5 text-right">
+                            <button onclick="logOutStaff('${escape(log.id)}')" 
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-100 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400 font-bold text-xs">
+                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                <span>Sign Out</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            } else {
+                staffPresenceBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-8 py-16 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="bg-blue-50 dark:bg-blue-900/30 w-12 h-12 rounded-2xl flex items-center justify-center mb-3">
+                                    <i data-lucide="shield-check" class="w-6 h-6 text-blue-400"></i>
+                                </div>
+                                <p class="text-slate-400 text-xs font-black uppercase tracking-widest">No faculty members checked in</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            if (window.lucide) window.lucide.createIcons();
+    }
+
+    // ── Student Queue ──
+    const queueCard = document.getElementById('queueCard');
+    if (queueCard) {
+        if (staffName === 'Employee Hub') {
+            queueCard.classList.add('hidden');
+        } else {
+            queueCard.classList.remove('hidden');
+        }
     }
 
     if (all.length === 0) {
@@ -311,7 +428,6 @@ async function renderQueue() {
 
         // Duration Calculation
         let durationHtml = '';
-        const now = new Date();
         const checkIn = new Date(log.timeIn);
 
         if (isCompleted) {
@@ -342,7 +458,11 @@ async function renderQueue() {
         }
 
         let actionBtn = '';
-        if (isPending) {
+        if (log.studentNumber === 'EMPLOYEE_LOG') {
+            actionBtn = `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-200">
+                             <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> On-Site
+                           </span>`;
+        } else if (isPending) {
             actionBtn = `<button onclick="startService('${escape(log.id)}')"
                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all flex items-center gap-2 ml-auto shadow-sm shadow-blue-500/20">
                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Start Service
@@ -419,6 +539,11 @@ async function renderQueue() {
 async function renderSummary() {
     const summaryCard = document.getElementById('summaryCard');
     if (!summaryCard) return;
+
+    if (staffName === 'Employee Hub') {
+        summaryCard.classList.add('hidden');
+        return; // Don't render summary for the Employee Hub
+    }
 
     const { all, completed } = await fetchQueue();
 
@@ -802,11 +927,17 @@ async function init() {
         return;
     }
 
-    // Show components
-    statsRow?.classList.remove('hidden');
-    statsRow?.classList.add('grid');
-    queueCard?.classList.remove('hidden');
-    document.getElementById('summaryCard')?.classList.remove('hidden');
+    // Show components based on hub type
+    if (staffName === 'Employee Hub') {
+        statsRow?.classList.add('hidden');
+        queueCard?.classList.add('hidden');
+        document.getElementById('summaryCard')?.classList.add('hidden');
+    } else {
+        statsRow?.classList.remove('hidden');
+        statsRow?.classList.add('grid');
+        queueCard?.classList.remove('hidden');
+        document.getElementById('summaryCard')?.classList.remove('hidden');
+    }
 
     if (facultyNameHeader) facultyNameHeader.textContent = staffName;
     document.title = `${staffName} - Faculty Hub`;
@@ -844,6 +975,13 @@ async function init() {
     // Proof upload listener
     document.getElementById('proofUploadInput')?.addEventListener('change', handleFileSelected);
 
+    // Header Logout button listener
+    document.getElementById('logoutHeaderBtn')?.addEventListener('click', () => {
+        if (confirm('Are you sure you want to log out of the system?')) {
+            window.authManager.handleLogout();
+        }
+    });
+
     // Proof modal close listeners
     const closeModal = () => {
         document.getElementById('proofViewerModal')?.classList.add('hidden');
@@ -860,3 +998,145 @@ if (document.readyState === 'loading') {
 } else {
     init();
 }
+// ----------------------------------------------------------------
+// Quick Student Lookup Logic
+// ----------------------------------------------------------------
+
+let allStudents = [];
+
+function initQuickLookup() {
+    const openBtn = document.getElementById('openSearchBtn');
+    const modal = document.getElementById('lookupModal');
+    const searchInput = document.getElementById('lookupSearchInput');
+
+    if (!openBtn || !modal || !searchInput) return;
+
+    openBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        searchInput.focus();
+        fetchStudentsForLookup();
+    });
+
+    searchInput.addEventListener('input', () => {
+        const term = searchInput.value.toLowerCase().trim();
+        renderLookupResults(term);
+    });
+}
+
+async function fetchStudentsForLookup() {
+    try {
+        const res = await fetch('/api/students');
+        allStudents = await res.json();
+    } catch (e) {
+        console.error('Error fetching students:', e);
+    }
+}
+
+function renderLookupResults(term) {
+    const resultsArea = document.getElementById('lookupResults');
+    if (!resultsArea) return;
+
+    if (!term) {
+        resultsArea.innerHTML = `<div class="text-center py-10 text-slate-400 italic">Type to search for students...</div>`;
+        return;
+    }
+
+    const filtered = allStudents.filter(s =>
+        (s.name || '').toLowerCase().includes(term) ||
+        (s.studentId || '').toLowerCase().includes(term) ||
+        (s.barcode || '').toLowerCase().includes(term)
+    ).slice(0, 50); // Limit to 50 results
+
+    if (filtered.length === 0) {
+        resultsArea.innerHTML = `<div class="text-center py-10 text-slate-400 italic">No students found matching "${term}"</div>`;
+        return;
+    }
+
+    resultsArea.innerHTML = filtered.map(s => `
+        <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-2xl border border-slate-100 dark:border-slate-600 hover:border-blue-500 transition-all group">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300 flex items-center justify-center font-bold">
+                    ${(s.name || 'S').charAt(0)}
+                </div>
+                <div>
+                    <p class="font-bold text-slate-900 dark:text-white leading-none mb-1">${s.name}</p>
+                    <p class="text-[10px] font-mono text-slate-400 uppercase tracking-widest">${s.studentId || s.barcode}</p>
+                </div>
+            </div>
+            <button onclick="viewStudentDetails('${s.barcode}')" class="px-4 py-2 bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all">
+                View History
+            </button>
+        </div>
+    `).join('');
+
+    if (window.lucide) lucide.createIcons();
+}
+
+async function viewStudentDetails(barcode) {
+    const student = allStudents.find(s => s.barcode === barcode);
+    if (!student) return;
+
+    const modal = document.getElementById('studentDetailsModal');
+    const content = document.getElementById('studentDetailsContent');
+    if (!modal || !content) return;
+
+    content.innerHTML = `
+        <div class="flex flex-col items-center py-4">
+            <div class="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <p class="mt-4 text-slate-500 font-medium">Loading history...</p>
+        </div>
+    `;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    try {
+        const res = await fetch(`/api/logs?studentNumber=${barcode}`);
+        const logs = await res.json();
+
+        // Sort logs: newest first
+        const sortedLogs = logs.sort((a, b) => new Date(b.timeIn) - new Date(a.timeIn)).slice(0, 10);
+
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-100 dark:border-slate-700">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Course & Year</p>
+                        <p class="font-bold text-slate-700 dark:text-slate-200">${student.course} - ${student.yearLevel}</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Student ID</p>
+                        <p class="font-bold text-slate-700 dark:text-slate-200">${student.studentId || 'N/A'}</p>
+                    </div>
+                </div>
+                
+                <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Recent Visits (Last 10)</h4>
+                <div class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                    ${sortedLogs.length === 0 ? '<p class="text-center py-4 italic text-slate-400">No visit history found.</p>' : sortedLogs.map(l => `
+                        <div class="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-100 dark:border-slate-600">
+                            <div class="flex justify-between items-start mb-1">
+                                <p class="font-bold text-sm text-slate-800 dark:text-slate-200">${l.activity}</p>
+                                <span class="text-[10px] bg-slate-200 dark:bg-slate-600 px-2 py-0.5 rounded uppercase font-black">${l.status}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px] text-slate-500">
+                                <span>${new Date(l.timeIn).toLocaleDateString()} ${new Date(l.timeIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>with ${l.staff || 'Generic'}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+    } catch (e) {
+        content.innerHTML = `<p class="text-red-500 font-bold">Error loading history. Please try again.</p>`;
+    }
+}
+
+// Export for global access via onclick
+window.viewStudentDetails = viewStudentDetails;
+
+// Initializations
+document.addEventListener('DOMContentLoaded', () => {
+    initQuickLookup();
+});

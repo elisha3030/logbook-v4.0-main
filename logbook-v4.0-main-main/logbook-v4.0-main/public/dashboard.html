@@ -66,8 +66,7 @@
                 </div>
             </a>
 
-            <div class="pt-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Management
-            </div>
+            <div class="pt-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-4 mb-4">Management</div>
 
             <a href="students.html"
                 class="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
@@ -76,8 +75,6 @@
                     Student Records
                 </div>
             </a>
-
-            <div id="facultyHubsSection"></div>
 
             <a href="settings.html"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 hover:text-white transition-all font-semibold group">
@@ -446,12 +443,15 @@
                 <!-- Data populated via JS -->
             </div>
 
-            <div class="p-8 pt-0 flex justify-end gap-3">
+            <div class="p-8 pt-0 flex items-center justify-between gap-3">
                 <button type="button" id="deleteEntryBtn"
-                    class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white font-black px-6 py-3 rounded-2xl transition-all flex items-center gap-2 mr-auto border border-red-100">
+                    class="bg-red-50 text-red-500 hover:bg-red-500 hover:text-white font-black px-6 py-3 rounded-2xl transition-all flex items-center gap-2 border border-red-100">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                     Delete Log
                 </button>
+                <div id="modalAdminActions" class="flex items-center gap-3">
+                    <!-- Populated via JS -->
+                </div>
             </div>
         </div>
     </div>

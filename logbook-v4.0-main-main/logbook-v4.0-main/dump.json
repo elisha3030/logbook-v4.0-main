@@ -1,0 +1,77 @@
+{
+  "logs": [],
+  "settings": [
+    {
+      "key": "faculty",
+      "value": "[\"Engr. Alvin Destajo\",\"Dr.  Mariciel Teogangco\"]",
+      "updatedAt": "2026-03-16 08:16:27"
+    },
+    {
+      "key": "officeName",
+      "value": "Engineering Office",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "officeId",
+      "value": "engineering-office",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "schoolName",
+      "value": "Your School Name",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "activities",
+      "value": "[\"Enrollment\",\"Inquiries\",\"Document Request\",\"Consultation\",\"Others\"]",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "yearLevelEnabled",
+      "value": "true",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "yearLevelRequired",
+      "value": "true",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "courseRequired",
+      "value": "true",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "autoSubmit",
+      "value": "false",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "audioFeedback",
+      "value": "true",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "appearanceMode",
+      "value": "light",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "autoCheckoutTime",
+      "value": "",
+      "updatedAt": "2026-03-18 05:21:31"
+    },
+    {
+      "key": "sessionTimeoutMinutes",
+      "value": "0",
+      "updatedAt": "2026-03-18 05:21:31"
+    }
+  ],
+  "faculty": [
+    {
+      "key": "faculty",
+      "value": "[\"Engr. Alvin Destajo\",\"Dr.  Mariciel Teogangco\"]",
+      "updatedAt": "2026-03-16 08:16:27"
+    }
+  ]
+}

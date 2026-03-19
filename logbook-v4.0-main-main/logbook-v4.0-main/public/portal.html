@@ -39,8 +39,9 @@
                     <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Authorized Access</p>
                 </div>
                 <button id="logoutBtn"
-                    class="bg-white dark:bg-slate-800 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:text-red-500 transition-all">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                    class="bg-white dark:bg-slate-800 flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:text-red-500 transition-all font-bold text-sm leading-none">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Log Out</span>
                 </button>
             </div>
         </header>
@@ -53,8 +54,21 @@
                     entry. Choose a category below to proceed to the logbook recording system.</p>
             </div>
 
+            <!-- Staff Presence Portal Monitor (New) -->
+            <div id="staffPresencePortal" class="hidden mb-12 w-full max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div class="flex flex-col items-center gap-4">
+                   <div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-blue-500"></i>
+                        <span class="text-[10px] font-black uppercase tracking-widest">Faculty Currently On-Site</span>
+                   </div>
+                   <div id="activeStaffList" class="flex flex-wrap justify-center gap-3">
+                        <!-- Populated via portal.js -->
+                   </div>
+                </div>
+            </div>
+
             <!-- Portal Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
                 <!-- Role Card: Student -->
                 <a href="student-logs.html"
                     class="group bg-white dark:bg-slate-800/40 backdrop-blur-xl p-8 h-full rounded-[2.5rem] border border-slate-200/80 dark:border-white/5 shadow-xl shadow-blue-900/5 hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
@@ -109,6 +123,17 @@
                     <h2 class="text-xl font-bold mb-2 tracking-tight">Employee</h2>
                     <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Non-Academic</p>
                 </a>
+
+                <!-- Role Card: Admin Dashboard (Secure Access) -->
+                <a href="dashboard.html"
+                    class="group bg-white dark:bg-slate-800/40 backdrop-blur-xl p-8 h-full rounded-[2.5rem] border border-slate-200/80 dark:border-white/5 shadow-xl shadow-indigo-900/5 hover:shadow-indigo-900/10 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center text-center">
+                    <div
+                        class="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
+                        <i data-lucide="layout-dashboard" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-xl font-bold mb-2 tracking-tight">Main Dashboard</h2>
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Global Management</p>
+                </a>
             </div>
         </main>
 
@@ -129,6 +154,7 @@
     </script>
     <script type="module" src="js/firebase.js"></script>
     <script type="module" src="js/auth.js"></script>
+    <script src="js/portal.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) {

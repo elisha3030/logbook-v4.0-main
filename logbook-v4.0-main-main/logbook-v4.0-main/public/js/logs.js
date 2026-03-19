@@ -667,6 +667,10 @@ class LogsManager {
         }
     }
 
+    async forceClockOut(entryId) {
+        await this.handleClockOut(entryId);
+    }
+
     async updateEntryStatus(entryId, newStatus) {
         try {
             console.log(`🔄 Updating entry ${entryId} to status: ${newStatus}`);
@@ -697,6 +701,10 @@ class LogsManager {
             console.error('❌ Error updating entry status:', error);
             this.showToast('Error updating status. Please try again.', 'error');
         }
+    }
+
+    async markAsDone(entryId) {
+        await this.updateEntryStatus(entryId, 'Completed');
     }
 
     viewEntry(entryId) {
@@ -785,25 +793,34 @@ class LogsManager {
                             View Proof
                         </button>
                     ` : ''}
-
-                    ${!entry.timeOutFormatted && entry.status === 'pending'
-                        ? `<button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-700 transition-all font-black uppercase tracking-widest text-xs" onclick="logsManager.completeEntry('${entry.id}')">
-                                        <i data-lucide="check" class="w-4 h-4"></i>
-                                        Mark Activity as Done
-                                    </button>`
-                        : ''
-                    }
-
-                    ${!entry.timeOutFormatted && entry.studentNumber === 'EMPLOYEE_LOG'
-                        ? `<button id="modalClockOutBtn" data-entry-id="${entry.id}" class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-red-600 text-white shadow-lg shadow-red-900/20 hover:bg-red-700 transition-all font-black uppercase tracking-widest text-xs mt-2">
-                                        <i data-lucide="clock" class="w-4 h-4"></i>
-                                        Clock Out Now
-                                    </button>`
-                        : ''
-                    }
                 </div>
             </div>
         `;
+
+        // Clear and populate Administrative Actions in footer
+        const adminActionsDir = document.getElementById('modalAdminActions');
+        if (adminActionsDir) {
+            adminActionsDir.innerHTML = '';
+            
+            // Mark as Done Button
+            if (entry.status === 'Pending' || entry.status === 'In Progress') {
+                const doneBtn = document.createElement('button');
+                doneBtn.className = 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white font-black px-6 py-3 rounded-2xl transition-all flex items-center gap-2 border border-emerald-100';
+                doneBtn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4"></i> Mark Done`;
+                doneBtn.onclick = () => this.markAsDone(entryId);
+                adminActionsDir.appendChild(doneBtn);
+            }
+
+            // Force Clock Out Button
+            if (entry.studentNumber === 'EMPLOYEE_LOG' && !entry.timeOut) {
+                const clockOutBtn = document.createElement('button');
+                clockOutBtn.className = 'bg-red-50 text-red-600 hover:bg-red-600 hover:text-white font-black px-6 py-3 rounded-2xl transition-all flex items-center gap-2 border border-red-100';
+                clockOutBtn.innerHTML = `<i data-lucide="power" class="w-4 h-4"></i> Force Clock Out`;
+                clockOutBtn.onclick = () => this.forceClockOut(entryId);
+                adminActionsDir.appendChild(clockOutBtn);
+            }
+        }
+
         lucide.createIcons();
 
         // Store current entry ID for deletion
