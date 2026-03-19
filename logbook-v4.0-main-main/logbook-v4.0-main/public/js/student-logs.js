@@ -197,7 +197,7 @@ class StudentKioskManager {
             document.getElementById('manualEntryForm')?.classList.add('hidden');
             document.getElementById('manualEntryInitial')?.classList.remove('hidden');
             // Clear inputs
-            ['manualName', 'manualId', 'manualProgram', 'manualYear'].forEach(id => {
+            ['manualName', 'manualId'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -206,10 +206,8 @@ class StudentKioskManager {
         document.getElementById('submitManualBtn')?.addEventListener('click', async () => {
             const name = document.getElementById('manualName')?.value.trim();
             const id = document.getElementById('manualId')?.value.trim();
-            const program = document.getElementById('manualProgram')?.value.trim();
-            const year = document.getElementById('manualYear')?.value.trim();
 
-            if (!name || !id || !program || !year) {
+            if (!name || !id) {
                 this.showToast('Please fill in all fields.', 'warning');
                 return;
             }
@@ -242,8 +240,8 @@ class StudentKioskManager {
                 id: id, // Internal reference
                 name: name,
                 studentId: id, // Readable ID
-                course: program,
-                yearLevel: year,
+                course: 'Guest',
+                yearLevel: 'N/A',
                 isManual: true,
                 activeLogs: [] // Manual entries won't have active logs to resume
             };
@@ -253,7 +251,7 @@ class StudentKioskManager {
         });
 
         // Add Enter key support for manual fields
-        ['manualName', 'manualId', 'manualProgram', 'manualYear'].forEach(id => {
+        ['manualName', 'manualId'].forEach(id => {
             document.getElementById(id)?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') document.getElementById('submitManualBtn')?.click();
             });
