@@ -314,11 +314,11 @@ async function renderQueue() {
     // ── Staff Presence Monitor ──
     // Render Staff Presence (Employee Monitoring)
     // Now visible to all faculty as general monitoring
-    const staffPresenceContainer = document.getElementById('staffPresenceContainer');
+    const staffPresenceSection = document.getElementById('staffPresenceSection');
     const staffPresenceBody = document.getElementById('staffPresenceTableBody');
     
-    if (staffPresenceContainer && staffPresenceBody) {
-        staffPresenceContainer.classList.remove('hidden');
+    if (staffPresenceSection && staffPresenceBody) {
+        staffPresenceSection.classList.remove('hidden');
         
         if (staffPresence.length > 0) {
             staffPresenceBody.innerHTML = staffPresence.map(log => {
