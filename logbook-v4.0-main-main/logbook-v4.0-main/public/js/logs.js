@@ -772,10 +772,12 @@ class LogsManager {
                             ${duration ? `<span class="px-2 py-0.5 rounded-lg bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 text-[10px] font-black uppercase tracking-widest border border-blue-200 dark:border-blue-700">Duration: ${duration}</span>` : ''}
                         </div>
                     </div>
+                    ${entry.studentNumber !== 'EMPLOYEE_LOG' ? `
                     <div class="bg-slate-50 dark:bg-slate-700 p-4 rounded-xl border border-slate-100 dark:border-slate-600">
                         <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Assigned Staff</p>
                         <p class="font-bold text-slate-900 dark:text-white">${entry.staff || '---'}</p>
                     </div>
+                    ` : ''}
                     <div class="grid grid-cols-2 gap-3">
                         <div class="bg-slate-50 dark:bg-slate-700 p-3 rounded-xl border border-slate-100 dark:border-slate-600">
                             <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Time In</p>

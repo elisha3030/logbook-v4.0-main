@@ -186,7 +186,7 @@ class EmployeeKioskManager {
                 studentName: this.employeeName,
                 studentId: this.employeeType, // "Faculty" or "Non-Faculty"
                 activity: `[Employee] ${this.selectedPurpose}`,
-                staff: 'Dr. Mariciel Teogangco',
+                staff: 'Employee Monitor',
                 status: 'in-service',
                 yearLevel: 'N/A',
                 course: this.employeeType,
