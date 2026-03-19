@@ -181,10 +181,48 @@ async function handleClockOut() {
 }
 
 // ----------------------------------------------------------------
+// Helper: Custom Confirm Modal
+// ----------------------------------------------------------------
+function showConfirmModal(title, message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirmModal');
+        const titleEl = document.getElementById('confirmTitle');
+        const messageEl = document.getElementById('confirmMessage');
+        const confirmBtn = document.getElementById('confirmConfirmBtn');
+        const cancelBtn = document.getElementById('confirmCancelBtn');
+
+        if (!modal || !confirmBtn || !cancelBtn) {
+            resolve(confirm(message));
+            return;
+        }
+
+        titleEl.textContent = title || 'Are you sure?';
+        messageEl.textContent = message || 'This action cannot be undone.';
+        
+        modal.classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+
+        const cleanup = (result) => {
+            modal.classList.add('hidden');
+            confirmBtn.removeEventListener('click', onConfirm);
+            cancelBtn.removeEventListener('click', onCancel);
+            resolve(result);
+        };
+
+        const onConfirm = () => cleanup(true);
+        const onCancel = () => cleanup(false);
+
+        confirmBtn.addEventListener('click', onConfirm);
+        cancelBtn.addEventListener('click', onCancel);
+    });
+}
+
+// ----------------------------------------------------------------
 // Individual Staff Sign Out (Administrative)
 // ----------------------------------------------------------------
 async function logOutStaff(logId) {
-    if (!confirm('Sign out this faculty member?')) return;
+    const confirmed = await showConfirmModal('Sign Out Staff', 'Are you sure you want to sign out this faculty member?');
+    if (!confirmed) return;
     
     try {
         const res = await fetch(`/api/logs/${logId}/complete`, {
@@ -261,7 +299,7 @@ async function fetchQueue() {
         const today = new Date().toLocaleDateString('en-CA');
 
         // --- GENERAL EMPLOYEE MONITORING ---
-        // Grab all active employee logs across the entire system, ignoring the current staffName
+        // Grab all active employee logs across the entire system
         const staffPresence = allLogs.filter(l => 
             l.studentNumber === 'EMPLOYEE_LOG' && 
             l.timeOut === null && 
@@ -302,9 +340,13 @@ async function renderQueue() {
     const now = new Date();
 
     // Update stats
-    document.getElementById('statPending').textContent = pending.length;
-    document.getElementById('statCompleted').textContent = completed.length;
-    document.getElementById('statTotal').textContent = all.length;
+    const statPending = document.getElementById('statPending');
+    const statCompleted = document.getElementById('statCompleted');
+    const statTotal = document.getElementById('statTotal');
+    
+    if (statPending) statPending.textContent = pending.length;
+    if (statCompleted) statCompleted.textContent = completed.length;
+    if (statTotal) statTotal.textContent = all.length;
 
     const lastRefreshedEl = document.getElementById('lastRefreshed');
     if (lastRefreshedEl) {
@@ -312,52 +354,52 @@ async function renderQueue() {
     }
 
     // ── Staff Presence Monitor ──
-    // Render Staff Presence (Employee Monitoring)
-    // Now visible to all faculty as general monitoring
     const staffPresenceSection = document.getElementById('staffPresenceSection');
     const staffPresenceBody = document.getElementById('staffPresenceTableBody');
     
     if (staffPresenceSection && staffPresenceBody) {
-        staffPresenceSection.classList.remove('hidden');
-        
-        if (staffPresence.length > 0) {
-            staffPresenceBody.innerHTML = staffPresence.map(log => {
-                const checkIn = new Date(log.timeIn);
-                const onSiteMs = now - checkIn;
-                return `
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                        <td class="px-8 py-5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black flex-shrink-0">
-                                    ${escape((log.studentName || 'S')[0]).toUpperCase()}
+        // ONLY show staff presence if viewing the Employee Hub
+        if (staffName === 'Employee Hub') {
+            staffPresenceSection.classList.remove('hidden');
+            
+            if (staffPresence.length > 0) {
+                staffPresenceBody.innerHTML = staffPresence.map(log => {
+                    const checkIn = new Date(log.timeIn);
+                    const onSiteMs = now - checkIn;
+                    return `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-8 py-5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs font-black flex-shrink-0">
+                                        ${escape((log.studentName || 'S')[0]).toUpperCase()}
+                                    </div>
+                                    <p class="font-bold text-slate-800 dark:text-white text-sm leading-none">${escape(log.studentName || '—')}</p>
                                 </div>
-                                <p class="font-bold text-slate-800 dark:text-white text-sm leading-none">${escape(log.studentName || '—')}</p>
-                            </div>
-                        </td>
-                        <td class="px-6 py-5 underline decoration-slate-200 underline-offset-4 decoration-dotted">
-                            <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${escape(log.studentId || 'Faculty')}</p>
-                        </td>
-                        <td class="px-6 py-5 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                            ${escape(log.activity || '—')}
-                        </td>
-                        <td class="px-6 py-5 text-center text-sm font-black text-blue-500">
-                            ${formatDuration(onSiteMs)}
-                        </td>
-                        <td class="px-6 py-5 text-center">
-                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-200">
-                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> On-Site
-                             </span>
-                        </td>
-                        <td class="px-8 py-5 text-right">
-                            <button onclick="logOutStaff('${escape(log.id)}')" 
-                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-100 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400 font-bold text-xs">
-                                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-                                <span>Sign Out</span>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+                            </td>
+                            <td class="px-6 py-5 underline decoration-slate-200 underline-offset-4 decoration-dotted">
+                                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">${escape(log.studentId || 'Faculty')}</p>
+                            </td>
+                            <td class="px-6 py-5 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                ${escape(log.activity || '—')}
+                            </td>
+                            <td class="px-6 py-5 text-center text-sm font-black text-blue-500">
+                                ${formatDuration(onSiteMs)}
+                            </td>
+                            <td class="px-6 py-5 text-center">
+                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider border border-blue-200">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> On-Site
+                                 </span>
+                            </td>
+                            <td class="px-8 py-5 text-right">
+                                <button onclick="logOutStaff('${escape(log.id)}')" 
+                                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-sm border border-red-100 dark:bg-red-900/20 dark:border-red-800/50 dark:text-red-400 font-bold text-xs">
+                                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                    <span>Sign Out</span>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             } else {
                 staffPresenceBody.innerHTML = `
                     <tr>
@@ -373,6 +415,9 @@ async function renderQueue() {
                 `;
             }
             if (window.lucide) window.lucide.createIcons();
+        } else {
+            staffPresenceSection.classList.add('hidden');
+        }
     }
 
     // ── Student Queue ──
